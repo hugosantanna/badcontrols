@@ -159,7 +159,7 @@ test_that("didbc dr_ml gives roughly correct coverage under DGP1", {
       yname = "Y", gname = "G", tname = "period", idname = "id",
       data = sim$data, bad_control_formula = ~X, xformula = ~Z,
       bad_control_cov_formula = ~W,
-      est_method = "dr_ml", nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
+      est_method = "dr_ml", num_threads = 2, nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
     )))
     est <- res$overall_att$overall.att
     se <- res$overall_att$overall.se
@@ -189,7 +189,7 @@ test_that("didbc dr_ml gives roughly correct coverage under DGP2", {
       yname = "Y", gname = "G", tname = "period", idname = "id",
       data = sim$data, bad_control_formula = ~X, xformula = ~Z,
       bad_control_cov_formula = ~W,
-      est_method = "dr_ml", nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
+      est_method = "dr_ml", num_threads = 2, nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
     )))
     est <- res$overall_att$overall.att
     se <- res$overall_att$overall.se
@@ -261,7 +261,7 @@ test_that("didbc dr_ml gives roughly correct coverage with bad_control_formula =
     res <- suppressMessages(suppressWarnings(didbc(
       yname = "Y", gname = "G", tname = "period", idname = "id",
       data = sim$data, bad_control_formula = NULL, xformula = ~Z,
-      est_method = "dr_ml", nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
+      est_method = "dr_ml", num_threads = 2, nfolds = 3, bstrap = FALSE, cband = FALSE, biters = 0
     )))
     est <- res$overall_att$overall.att
     se <- res$overall_att$overall.se

@@ -1,3 +1,8 @@
+# badcontrols 1.0.1
+
+* Tests now pin `num_threads = 2` for the `grf`-backed estimators so that
+  `R CMD check` stays within CRAN's two-core limit. No user-facing changes.
+
 # badcontrols 1.0.0
 
 * First CRAN release.

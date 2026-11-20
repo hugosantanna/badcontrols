@@ -1,7 +1,26 @@
+## Resubmission
+
+This is a resubmission of version 1.0.0, rejected by the incoming pre-tests
+with the following NOTE on r-devel-linux-x86_64-debian-gcc:
+
+    Running R code in 'testthat.R' had CPU time 4.6 times elapsed time
+
+The `dr_ml` tests call `grf`, which by default uses every available core.
+The tests now pass `num_threads = 2` to every `grf`-backed call, keeping
+`R CMD check` within CRAN's two-core limit. Verified locally with
+`_R_CHECK_LIMIT_CORES_=TRUE`. The package code is unchanged; the version was
+bumped to 1.0.1 for the resubmission.
+
+The incoming-feasibility NOTE "Possibly misspelled words in DESCRIPTION:
+Caetano, Callaway, Sant'Anna" lists the surnames of the authors of the paper
+the package implements; they are spelled correctly.
+
 ## Test environments
 
 - Local Ubuntu 24.04.4 LTS, R 4.6.1, `rcmdcheck::rcmdcheck(args = c("--as-cran"))`:
     - 0 errors, 0 warnings, 1 note (see below).
+- Local macOS (Apple Silicon), R 4.6.0, `R CMD check --as-cran` with
+  `_R_CHECK_LIMIT_CORES_=TRUE`: 0 errors, 0 warnings, 1 note (new submission).
 - GitHub Actions:
     - Windows-latest (R release)
     - Windows-latest (R devel)
