@@ -1,3 +1,48 @@
+# badcontrols 1.1.0
+
+* Sampling weights (`weightsname`) now work. They were passed on to
+  ptetools, which only used them to aggregate across groups, so
+  `ATT(g,t)` and its standard errors were those of the unweighted
+  estimator. They now enter both imputation estimators (each regression,
+  the average over treated units and the influence function, including the
+  logit for a binary bad control) and `dr_ml` (every nuisance function,
+  with `grf`'s `sample.weights` for forests, and the doubly robust score).
+  Integer weights give the same estimates as duplicating units; without a
+  bad control, the weighted imputation estimator matches
+  `did::att_gt(est_method = "reg")` with weights, standard errors
+  included. Results without weights are unchanged.
+* New `clustervars` argument to cluster standard errors at a level above
+  the unit, as in `did::att_gt()`: one variable, constant within each
+  unit. It applies to analytical and bootstrap standard errors (through
+  ptetools). With `est_method = "dr_ml"`, cross-fitting folds are also
+  assigned by cluster, so no cluster has units in both the training and
+  held-out folds.
+* Covariate formulas can now transform variables, e.g.
+  `xformula = ~ factor(state) + I(z^2)` or
+  `bad_control_cov_formula = ~ log(w)`. Transformed terms in `xformula`
+  failed with "object not found", and in the other covariate formulas the
+  transformation was silently ignored. `est_method = "dr_ml"` with
+  `nuisance_method = "ml"` now also accepts factor and character
+  covariates (they used to fail inside `grf`). A transformed
+  `bad_control_formula` (e.g. `~ log(x)`) now gives an error instead of
+  silently using the untransformed variable.
+* When a covariate does not vary among comparison units (given the others)
+  but does among treated units, such as a dummy for a region with treated
+  units only, it is now dropped with a warning that the estimates
+  extrapolate for those treated units, as in ptetools. Such covariates
+  used to be dropped silently by `lm()`, or make the influence function
+  fail. Duplicated covariates and empty factor levels are dropped
+  silently.
+* Warnings are now given once per call, listing the group-time cells,
+  instead of once per cell (and again for every empirical bootstrap
+  draw): `dr_ml`'s fallbacks to the imputation estimator (too few treated
+  units, or propensity scores above `overlap_threshold`, now reported as
+  the number of units rather than their ids), and change covariates that
+  are dropped because their change is the same for every unit.
+* `boot_type = "empirical"` no longer warns "aggte_fun not specified"
+  (from ptetools).
+* Requires ptetools (>= 1.1.0).
+
 # badcontrols 1.0.1
 
 * Tests now pin `num_threads = 2` for the `grf`-backed estimators so that

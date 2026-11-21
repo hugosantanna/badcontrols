@@ -1,6 +1,6 @@
 Package: badcontrols
 Title: Difference-in-Differences with Bad Controls
-Version: 1.0.1
+Version: 1.1.0
 Authors@R: c(
     person("Carolina", "Caetano", role = "aut",
            email = "ccaetano@uga.edu"),
@@ -20,7 +20,7 @@ Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 4.1.0)
 Imports:
-    ptetools (>= 1.0.1),
+    ptetools (>= 1.1.0),
     stats
 Suggests:
     grf (>= 2.0.0),
@@ -29,4 +29,4 @@ Suggests:
     quarto
 VignetteBuilder: quarto
 Config/testthat/edition: 3
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

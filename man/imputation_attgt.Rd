@@ -20,7 +20,8 @@ imputation_attgt(
 \item{gt_data}{data.frame from ptetools::two_by_two_subset}
 
 \item{xformula}{One-sided formula for general exogenous covariates,
-entered as their pre-treatment-period level (default \code{~1})}
+entered as their pre-treatment-period level (default \code{~1}).
+Terms can transform variables, e.g. \code{~ factor(state) + I(z^2)}.}
 
 \item{bad_control_formula}{One-sided formula naming exactly one bad
 control variable (a time-varying covariate affected by treatment).
@@ -62,10 +63,15 @@ and does not distinguish a binary bad control.}
 Imputation ATT(g,t) estimator for bad controls
 }
 \details{
-This function only handles the shared leadin (pivoting \code{gt_data} to
-one row per unit, and constructing the covariate columns/names), then
+This function only builds the cell's data (one row per unit, with its
+sampling weight and covariate matrices; see \code{bc_cell_data()}), then
 dispatches to \code{\link{imputation_unconfoundedness}} or
 \code{\link{imputation_did}} depending on
 \code{bad_control_identification_strategy}.
+
+With sampling weights (\code{weightsname} in \code{didbc()}), both steps
+are weighted regressions, the ATT is the weighted mean over treated units,
+and the influence function carries each unit's weight, so standard errors
+are for the weighted estimator.
 }
 \keyword{internal}

@@ -22,6 +22,7 @@ didbc(
   anticipation = 0,
   base_period = "varying",
   weightsname = NULL,
+  clustervars = NULL,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -55,7 +56,12 @@ in which case \code{didbc} reduces to plain DiD with covariates.
 Multiple bad controls are not yet supported.}
 
 \item{xformula}{One-sided formula for general exogenous covariates,
-entered as their pre-treatment-period level (default \code{~1})}
+entered as their pre-treatment-period level (default \code{~1}).
+Terms can transform variables, e.g. \code{~ factor(state) + I(z^2)};
+this holds for all the covariate formulas. Covariates that do not vary
+among comparison units but do among treated units are dropped, with a
+warning that the estimates extrapolate for those treated units (see
+\code{ptetools::check_overlap()}).}
 
 \item{d_covs_formula}{One-sided formula for general exogenous covariates,
 entered as their change (post minus pre) rather than a level. Default
@@ -106,7 +112,17 @@ already affect the outcome (default 0). Passed to
 \code{ptetools::two_by_two_subset}.}
 
 \item{weightsname}{Name of a sampling-weights variable in \code{data}
-(default \code{NULL})}
+(default \code{NULL}). Weights must be non-negative and constant over
+time within each unit. They enter every regression and nuisance
+function, the averages over treated units, the influence functions
+(so the standard errors), and the aggregation across groups.}
+
+\item{clustervars}{Name of a variable in \code{data} to cluster standard
+errors on, in addition to \code{idname} (as in \code{did::att_gt()}):
+one variable, constant over time within each unit (default \code{NULL},
+clustering at the unit level). Applies to analytical and bootstrap
+standard errors; with \code{est_method = "dr_ml"}, cross-fitting folds
+are also assigned by cluster.}
 
 \item{cband}{Logical; compute a uniform confidence band instead of
 pointwise confidence intervals (default \code{TRUE})}
@@ -131,13 +147,14 @@ pointwise confidence intervals (default \code{TRUE})}
 unit's fitted propensity (from a preliminary, non-cross-fit fit)
 exceeds this value in a (g,t) cell, estimation falls back to the
 imputation estimator for that cell, with a warning naming the group,
-time period, and offending unit IDs. Default 0.99.}
+time period, and number of units above the threshold. Default 0.99.}
 
 \item{min_group_size}{For \code{est_method = "dr_ml"} only: if a (g,t)
 cell has fewer treated units than the number of propensity-score
 covariates plus \code{min_group_size}, estimation falls back to the
 imputation estimator for that cell, with a warning naming the group,
-time period, and treated count -- a separate trigger from
+time period, and treated count (each kind of warning is given once
+per call, listing the cells) -- a separate trigger from
 \code{overlap_threshold}, since fitting the propensity score needs a
 nontrivial treated sample to identify at all, relative to how many
 covariates it has to fit, which can fail even under good covariate

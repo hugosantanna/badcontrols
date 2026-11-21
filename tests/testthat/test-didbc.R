@@ -219,3 +219,25 @@ test_that("dr_ml_attgt() recovers the true ATT(g,t) when called directly on one 
   true_att <- sim$true_att_gt$att[sim$true_att_gt$g == 2 & sim$true_att_gt$t == 2]
   expect_equal(res$att, true_att, tolerance = 0.1)
 })
+
+test_that("clustervars is passed on to ptetools", {
+  set.seed(1)
+  sim <- simulate_bad_controls(
+    n = 1000, T_max = 2, groups = 2, dgp = "dgp1", beta_drift = 0
+  )
+  d <- sim$data
+  d$cl <- (d$id %% 25) + 1
+  run <- function(...) {
+    suppressWarnings(didbc(
+      yname = "Y", gname = "G", tname = "period", idname = "id", data = d,
+      bad_control_formula = ~X, xformula = ~Z, bad_control_cov_formula = ~W,
+      est_method = "imputation", bstrap = FALSE, ...
+    ))$overall_att
+  }
+  unclustered <- run()
+  # clustering on the unit id is the same as not clustering
+  expect_equal(run(clustervars = "id")$overall.se, unclustered$overall.se)
+  clustered <- run(clustervars = "cl")
+  expect_equal(clustered$overall.att, unclustered$overall.att)
+  expect_false(isTRUE(all.equal(clustered$overall.se, unclustered$overall.se)))
+})

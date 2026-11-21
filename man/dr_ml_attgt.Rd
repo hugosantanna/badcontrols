@@ -17,6 +17,7 @@ dr_ml_attgt(
   min_group_size = 5,
   n_folds = 5,
   num_threads = NULL,
+  clustervars = NULL,
   ...
 )
 }
@@ -79,6 +80,10 @@ in outer parallelism (one core each) rather than letting each individual
 forest fit claim every core on the machine. Unused under
 \code{nuisance_method = "parametric"} (\code{lm}/\code{glm} have no
 thread concept).}
+
+\item{clustervars}{Name of the cluster variable in \code{gt_data}, or
+\code{NULL} (the default). If given, cross-fitting folds are assigned
+by cluster; see Details.}
 
 \item{...}{additional arguments (unused)}
 }
@@ -163,8 +168,8 @@ would leave a moment that is not Neyman orthogonal, which is exactly why
 that this function's nuisances don't have:
 \enumerate{
 \item \strong{Small treated group.} If the cell has fewer treated
-units than the number of p_2 covariates plus \code{min_group_size},
-a warning names the group, time period, and treated count. Fitting
+units than the number of p_2 covariates plus \code{min_group_size}.
+\code{didbc()} warns once, listing the cells and treated counts. Fitting
 p_2 needs a nontrivial treated sample to identify at all, relative
 to how many covariates it has to fit (a logit can hit perfect
 separation, a \code{probability_forest} is essentially memorizing a
@@ -174,9 +179,28 @@ overlap below.
 \item \strong{Overlap.} Before cross-fitting, a preliminary propensity
 model (not used in the final estimation) is fit once on the whole
 cell: if any unit's fitted propensity exceeds
-\code{overlap_threshold}, a warning names the group, time period,
-and offending unit IDs.
+\code{overlap_threshold}. \code{didbc()} warns once, listing the
+cells and the number of units above the threshold.
 }
+
+\strong{Sampling weights.} With \code{weightsname} in \code{didbc()},
+every nuisance function is fit with the sampling weights (as
+\code{sample.weights} in \code{grf}, or as regression weights), and the
+doubly robust score, the share of treated units and the influence
+function are weighted.
+
+\strong{Clustering.} With \code{clustervars}, the cross-fitting folds
+are assigned by cluster, so that no cluster has units in both the
+training and held-out folds, as is usual for cross-fitting with
+dependent data (Chernozhukov et al. 2018). Cluster-robust standard
+errors themselves come from \code{ptetools}.
+
+\strong{Covariates.} Covariate formulas can transform variables (e.g.
+\code{~ factor(state) + I(z^2)}); factors are expanded into dummies
+for \code{grf}. With \code{nuisance_method = "parametric"}, covariates
+that are collinear among the units a model is fit on are dropped, with a
+warning when the outcome model would then extrapolate for treated
+units.
 }
 \examples{
 \dontrun{
@@ -201,6 +225,10 @@ summary(res)
 Caetano, C., Callaway, B., Payne, S., and Sant'Anna, H. (2026).
 "Difference-in-Differences with Bad Controls." arXiv preprint
 arXiv:2608.03881. \doi{10.48550/arXiv.2608.03881}
+
+Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C.,
+Newey, W., and Robins, J. (2018). "Double/Debiased Machine Learning for
+Treatment and Structural Parameters." \emph{The Econometrics Journal}.
 
 Sant'Anna, P.H.C. and Zhao, J. (2020). "Doubly Robust
 Difference-in-Differences Estimators." \emph{Journal of Econometrics}.

@@ -4,44 +4,10 @@
 \alias{imputation_did}
 \title{Imputation estimator under parallel trends for the bad control}
 \usage{
-imputation_did(
-  wide_data,
-  pre_data,
-  post_data,
-  D,
-  n,
-  x_names,
-  dx_names,
-  bc_cov_names,
-  bc_dcov_names,
-  comparison_idx,
-  bad_control_formula
-)
+imputation_did(cd)
 }
 \arguments{
-\item{wide_data}{one row per unit, as constructed by
-\code{\link{imputation_attgt}}}
-
-\item{pre_data, post_data}{the pre/post-period long-format subsets of the
-original \code{gt_data}, as constructed by
-\code{\link{imputation_attgt}}}
-
-\item{D}{treatment indicator vector, aligned to \code{wide_data}}
-
-\item{n}{number of units (\code{nrow(wide_data)})}
-
-\item{x_names, dx_names}{names of the general exogenous covariate columns
-(level and change, respectively) already merged into \code{wide_data}}
-
-\item{bc_cov_names, bc_dcov_names}{names of the bad-control auxiliary
-covariate columns (level and change, respectively, W in the paper)
-already merged into \code{wide_data}}
-
-\item{comparison_idx}{row indices of \code{wide_data} in the comparison
-(untreated) group}
-
-\item{bad_control_formula}{One-sided formula naming the bad control
-variable, or \code{NULL} for no bad control at all}
+\item{cd}{one (g,t) cell's data, from \code{bc_cell_data()}}
 }
 \description{
 Implements the two-step imputation estimator and its influence function

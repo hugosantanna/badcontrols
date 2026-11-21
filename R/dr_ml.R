@@ -1,3 +1,14 @@
+# =============================================================================
+# Title: Doubly robust (DR/ML) estimator for ATT(g,t) with a bad control
+# Description: dr_ml_attgt() -- the cross-fitted doubly robust estimator of
+#   Algorithm 1 in the paper, with nuisance functions from random forests
+#   (grf) or linear/logit working models -- and its nuisance-fitting and
+#   cross-fitting helpers.
+# Author: Brant Callaway
+# Last update: 2026-11-20
+# Date created: 2026-07-25
+# =============================================================================
+
 #' @title Doubly Robust Estimator for Bad Controls
 #'
 #' @description Implements the semiparametric doubly robust estimator from
@@ -76,8 +87,8 @@
 #'  that this function's nuisances don't have:
 #'  \enumerate{
 #'    \item \strong{Small treated group.} If the cell has fewer treated
-#'      units than the number of p_2 covariates plus \code{min_group_size},
-#'      a warning names the group, time period, and treated count. Fitting
+#'      units than the number of p_2 covariates plus \code{min_group_size}.
+#'      \code{didbc()} warns once, listing the cells and treated counts. Fitting
 #'      p_2 needs a nontrivial treated sample to identify at all, relative
 #'      to how many covariates it has to fit (a logit can hit perfect
 #'      separation, a \code{probability_forest} is essentially memorizing a
@@ -87,9 +98,28 @@
 #'    \item \strong{Overlap.} Before cross-fitting, a preliminary propensity
 #'      model (not used in the final estimation) is fit once on the whole
 #'      cell: if any unit's fitted propensity exceeds
-#'      \code{overlap_threshold}, a warning names the group, time period,
-#'      and offending unit IDs.
+#'      \code{overlap_threshold}. \code{didbc()} warns once, listing the
+#'      cells and the number of units above the threshold.
 #'  }
+#'
+#'  \strong{Sampling weights.} With \code{weightsname} in \code{didbc()},
+#'  every nuisance function is fit with the sampling weights (as
+#'  \code{sample.weights} in \code{grf}, or as regression weights), and the
+#'  doubly robust score, the share of treated units and the influence
+#'  function are weighted.
+#'
+#'  \strong{Clustering.} With \code{clustervars}, the cross-fitting folds
+#'  are assigned by cluster, so that no cluster has units in both the
+#'  training and held-out folds, as is usual for cross-fitting with
+#'  dependent data (Chernozhukov et al. 2018). Cluster-robust standard
+#'  errors themselves come from \code{ptetools}.
+#'
+#'  \strong{Covariates.} Covariate formulas can transform variables (e.g.
+#'  \code{~ factor(state) + I(z^2)}); factors are expanded into dummies
+#'  for \code{grf}. With \code{nuisance_method = "parametric"}, covariates
+#'  that are collinear among the units a model is fit on are dropped, with a
+#'  warning when the outcome model would then extrapolate for treated
+#'  units.
 #'
 #' @param gt_data data.frame from \code{ptetools::two_by_two_subset} with
 #'   columns id, D, period, name (pre/post), Y, plus covariate columns
@@ -138,6 +168,9 @@
 #'   forest fit claim every core on the machine. Unused under
 #'   \code{nuisance_method = "parametric"} (\code{lm}/\code{glm} have no
 #'   thread concept).
+#' @param clustervars Name of the cluster variable in \code{gt_data}, or
+#'   \code{NULL} (the default). If given, cross-fitting folds are assigned
+#'   by cluster; see Details.
 #' @param ... additional arguments (unused)
 #'
 #' @return \code{attgt_if} object with ATT estimate and influence function
@@ -165,6 +198,10 @@
 #'   "Difference-in-Differences with Bad Controls." arXiv preprint
 #'   arXiv:2608.03881. \doi{10.48550/arXiv.2608.03881}
 #'
+#' Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C.,
+#'   Newey, W., and Robins, J. (2018). "Double/Debiased Machine Learning for
+#'   Treatment and Structural Parameters." \emph{The Econometrics Journal}.
+#'
 #' Sant'Anna, P.H.C. and Zhao, J. (2020). "Doubly Robust
 #'   Difference-in-Differences Estimators." \emph{Journal of Econometrics}.
 #'
@@ -185,6 +222,7 @@ dr_ml_attgt <- function(gt_data,
                         min_group_size = 5,
                         n_folds = 5,
                         num_threads = NULL,
+                        clustervars = NULL,
                         ...) {
 
   nuisance_method <- match.arg(nuisance_method)
@@ -194,72 +232,36 @@ dr_ml_attgt <- function(gt_data,
          "Install with: install.packages('grf')")
   }
 
-  # Extract group/time info
-  this_g <- unique(gt_data$G[gt_data$name == "post" & gt_data$D == 1])
-  this_tp <- unique(gt_data$period[gt_data$name == "post"])
-
-  # Pivot panel to wide (one row per unit, pre/post as separate columns)
-  pre_data <- gt_data[gt_data$name == "pre", ]
-  post_data <- gt_data[gt_data$name == "post", ]
-
-  wide_data <- merge(
-    pre_data[, c("id", "D", "Y")],
-    post_data[, c("id", "Y")],
-    by = "id", suffixes = c("_pre", "_post")
+  # One row per unit, with sampling weights (mean 1) and covariate matrices;
+  # transformed and factor covariates are already expanded to numeric
+  # columns, which grf needs.
+  cd <- bc_cell_data(
+    gt_data,
+    xformula = xformula,
+    bad_control_formula = bad_control_formula,
+    d_covs_formula = d_covs_formula,
+    bad_control_cov_formula = bad_control_cov_formula,
+    bad_control_d_cov_formula = bad_control_d_cov_formula
   )
-  wide_data$DeltaY <- wide_data$Y_post - wide_data$Y_pre
-  D <- wide_data$D
-
-  # --- x: general exogenous covariates, pre-period level ---
-  if (is.null(xformula)) xformula <- ~1
-  x_pre <- stats::model.frame(xformula, data = pre_data)
-  x_names <- character(0)
-  if (ncol(x_pre) > 0) {
-    x_df <- cbind(data.frame(id = pre_data$id), x_pre)
-    wide_data <- merge(wide_data, x_df, by = "id")
-    x_names <- names(x_pre)
-  }
-  D <- wide_data$D # re-extract after merge
-
-  # --- general exogenous covariates entered as a change ---
-  dcov_result <- add_diff_covariates(wide_data, pre_data, post_data, d_covs_formula, "d_")
-  wide_data <- dcov_result$wide_data
-  dx_names <- dcov_result$names
-
-  # --- bc_cov: auxiliary covariates for modeling the bad control, pre-period
-  # level (W in the paper) ---
-  bc_cov_names <- character(0)
-  if (!is.null(bad_control_cov_formula)) {
-    bc_cov_vars <- all.vars(bad_control_cov_formula)
-    for (v in bc_cov_vars) {
-      wide_data[[paste0("bc_cov_", v)]] <- pre_data[[v]][match(wide_data$id, pre_data$id)]
-    }
-    bc_cov_names <- paste0("bc_cov_", bc_cov_vars)
-  }
-
-  # --- bc_cov entered as a change instead of a level ---
-  bc_dcov_result <- add_diff_covariates(wide_data, pre_data, post_data, bad_control_d_cov_formula, "bc_dcov_")
-  wide_data <- bc_dcov_result$wide_data
-  bc_dcov_names <- bc_dcov_result$names
-
-  n <- nrow(wide_data)
+  D <- cd$D
+  w <- cd$w
+  DeltaY <- cd$DeltaY
+  has_bc <- cd$has_bc
+  n <- length(D)
   n1 <- sum(D)
   n0 <- n - n1
-  pi_hat <- n1 / n
-  DeltaY <- wide_data$DeltaY
   comparison_idx <- which(D == 0)
+  treated_idx <- which(D == 1)
 
-  # bad_control_formula is validated (exactly one variable, if not NULL) by
-  # didbc() before this function is ever called.
-  has_bc <- !is.null(bad_control_formula)
-  bc_var <- NULL
-  if (has_bc) {
-    bc_var <- all.vars(bad_control_formula)[1]
-    # bc_pre/bc_post correspond to X_{t*-1}/X_{t*} in the paper. No
-    # counterfactual imputation is needed here: for untreated units X_t* =
-    # X_t*(0) is observed directly.
-    wide_data$bc_pre <- pre_data[[bc_var]][match(wide_data$id, pre_data$id)]
-    wide_data$bc_post <- post_data[[bc_var]][match(wide_data$id, post_data$id)]
+  # grf's forests are left unweighted when all weights are equal, so results
+  # without sampling weights are exactly those of an unweighted fit
+  sample_weights <- if (isTRUE(all.equal(min(w), max(w)))) NULL else w
+
+  # Fall back to the imputation estimator for the whole cell; see Details
+  # for why. Reported once per call through a ptetools cell warning.
+  fallback <- function(summary, detail) {
+    ptetools::pte_cell_warning(summary, detail)
+    imputation_unconfoundedness(cd, bad_control_binary = bad_control_binary)
   }
 
   # m_0 and omega_0 depend on (X_t*, X_t*-1, Z); nu_0 and p_2 depend on
@@ -267,11 +269,27 @@ dr_ml_attgt <- function(gt_data,
   # covariates, in levels or as changes -- the same regressor sets used for
   # the analogous steps in imputation_attgt(). With no bad control, both
   # collapse to just (Z), and nu_0/omega_0 are skipped entirely below.
-  m_feat_names <- c(if (has_bc) c("bc_post", "bc_pre"), dx_names, x_names)
-  p_feat_names <- c(if (has_bc) c("bc_pre", bc_cov_names, bc_dcov_names), dx_names, x_names)
+  if (has_bc) {
+    m_features <- cbind(cd$bc_post, cd$bc_pre, cd$dX, cd$X)
+    colnames(m_features)[1:2] <- paste0(cd$bc_var, c("_post", "_pre"))
+    p_features <- cbind(cd$bc_pre, cd$W, cd$dW, cd$dX, cd$X)
+    colnames(p_features)[1] <- paste0(cd$bc_var, "_pre")
+  } else {
+    m_features <- cbind(cd$dX, cd$X)
+    p_features <- m_features
+  }
 
-  m_features <- as.matrix(wide_data[, m_feat_names, drop = FALSE])
-  p_features <- as.matrix(wide_data[, p_feat_names, drop = FALSE])
+  # Linear working models: drop collinear columns once, on the whole cell,
+  # warning when m_0 (fit on comparison units) would extrapolate for treated
+  # units, as the imputation estimator does. Forests need neither.
+  if (nuisance_method == "parametric") {
+    m_check <- bc_fit(m_features, DeltaY[comparison_idx], w, comparison_idx,
+                      D)
+    m_features <- m_features[, m_check$keep[-1] - 1, drop = FALSE]
+    p_check <- qr(cbind(1, p_features))
+    p_keep <- sort(p_check$pivot[seq_len(p_check$rank)])
+    p_features <- p_features[, p_keep[-1] - 1, drop = FALSE]
+  }
 
   # Small treated group: even under perfect overlap, fitting p_2 (and by
   # extension omega_0) needs a nontrivial treated sample to identify at all
@@ -280,26 +298,15 @@ dr_ml_attgt <- function(gt_data,
   # essentially memorizing a handful of points. Unlike the overlap check
   # below, this doesn't need an unlucky covariate configuration to show up;
   # it can happen even when the population-level covariate distributions
-  # overlap fine. Falls back to imputation_attgt() the same way, since its
+  # overlap fine. Falls back to the imputation estimator, since its
   # Step 1/Step 2 are fit entirely on the comparison group and only ever
   # average over treated units, never fit anything on them.
-  min_treated <- length(p_feat_names) + min_group_size
+  min_treated <- ncol(p_features) + min_group_size
   if (n1 < min_treated) {
-    warning(
-      "Group ", this_g, " in time period ", this_tp, " has only ", n1,
-      " treated unit(s), fewer than the ", length(p_feat_names),
-      " p_2 covariate(s) plus min_group_size = ", min_group_size,
-      " (", min_treated, "); falling back to the imputation estimator ",
-      "for this (g,t) cell."
-    )
-    return(imputation_attgt(
-      gt_data = gt_data,
-      xformula = xformula,
-      bad_control_formula = bad_control_formula,
-      d_covs_formula = d_covs_formula,
-      bad_control_cov_formula = bad_control_cov_formula,
-      bad_control_d_cov_formula = bad_control_d_cov_formula,
-      bad_control_binary = bad_control_binary
+    return(fallback(
+      paste0("dr_ml fell back to the imputation estimator: fewer treated ",
+             "units than propensity-score covariates plus min_group_size"),
+      paste0(n1, " treated, ", min_treated, " needed")
     ))
   }
 
@@ -307,43 +314,55 @@ dr_ml_attgt <- function(gt_data,
   # in the final estimation). Uses the same nuisance_method as the real
   # estimation (forest or logit), since the point is to ask whether *this*
   # estimation is going to run into an overlap problem, not a generic proxy.
-  # If violated, fall back to imputation_attgt() for the whole cell rather
-  # than dropping p_2/omega_0 alone -- see Details for why.
-  overlap_fit <- fit_prop_nuisance(p_features, D, nuisance_method, num_threads)
+  # If violated, fall back to the imputation estimator for the whole cell
+  # rather than dropping p_2/omega_0 alone -- see Details for why.
+  overlap_fit <- fit_prop_nuisance(p_features, D, nuisance_method,
+                                   num_threads, sample_weights)
   overlap_p <- predict_prop_nuisance(overlap_fit, p_features, nuisance_method)
   overlap_violation <- overlap_p > overlap_threshold
   if (any(overlap_violation)) {
-    warning(
-      "Overlap violated for group ", this_g, " in time period ", this_tp,
-      ": unit(s) ", paste(wide_data$id[overlap_violation], collapse = ", "),
-      " have estimated propensity above ", overlap_threshold,
-      "; falling back to the imputation estimator for this (g,t) cell."
-    )
-    return(imputation_attgt(
-      gt_data = gt_data,
-      xformula = xformula,
-      bad_control_formula = bad_control_formula,
-      d_covs_formula = d_covs_formula,
-      bad_control_cov_formula = bad_control_cov_formula,
-      bad_control_d_cov_formula = bad_control_d_cov_formula,
-      bad_control_binary = bad_control_binary
+    return(fallback(
+      paste0("dr_ml fell back to the imputation estimator: estimated ",
+             "propensity scores above overlap_threshold = ",
+             overlap_threshold),
+      paste0(sum(overlap_violation), " of ", n, " units")
     ))
   }
 
-  fold_ids <- rep(NA_integer_, n)
-  treated_idx <- which(D == 1)
-  fold_ids[treated_idx] <- sample(rep(1:n_folds, length.out = length(treated_idx)))
-  fold_ids[comparison_idx] <- sample(rep(1:n_folds, length.out = length(comparison_idx)))
+  # Cross-fitting folds. With clustervars, whole clusters are assigned to
+  # folds, so that no cluster has units in both the training and the
+  # held-out folds (the usual practice with dependent data; Chernozhukov et
+  # al. 2018). Folds are balanced separately among treated and comparison
+  # units (clusters with and without treated units).
+  cl <- NULL
+  if (!is.null(clustervars)) {
+    cl <- gt_data[gt_data$name == "pre", clustervars]
+    cl <- cl[match(cd$id, gt_data$id[gt_data$name == "pre"])]
+    if (length(unique(cl[treated_idx])) < 2) {
+      return(fallback(
+        paste0("dr_ml fell back to the imputation estimator: cross-fitting ",
+               "by cluster needs treated units in at least two clusters"),
+        paste0(length(unique(cl[treated_idx])), " cluster with treated units")
+      ))
+    }
+  }
+  # drawn after the overlap check's forest, which takes its seed from R's
+  # RNG, so that results for a given seed are those of earlier versions
+  fold_ids <- bc_folds(D, n_folds, cl)
 
   m_hat <- rep(NA_real_, n)
   nu_hat <- rep(NA_real_, n)
   p_hat <- rep(NA_real_, n)
   omega_hat <- rep(NA_real_, n)
 
+  # sampling weights of a subset of units (NULL without weights)
+  sw <- function(idx) if (is.null(sample_weights)) NULL else w[idx]
+
   for (k in 1:n_folds) {
     train_idx <- which(fold_ids != k)
     train_comp_idx <- intersect(train_idx, comparison_idx)
     eval_idx <- which(fold_ids == k)
+    if (length(eval_idx) == 0) next
 
     m_features_train_comp <- m_features[train_comp_idx, , drop = FALSE]
     p_features_train_comp <- p_features[train_comp_idx, , drop = FALSE]
@@ -352,9 +371,12 @@ dr_ml_attgt <- function(gt_data,
 
     # First stage (Algorithm 1, step 2a): m_0 on untreated units, p_2 on all
     # units.
-    m_fit <- fit_reg_nuisance(m_features_train_comp, DeltaY[train_comp_idx], nuisance_method, num_threads)
+    m_fit <- fit_reg_nuisance(m_features_train_comp, DeltaY[train_comp_idx],
+                              nuisance_method, num_threads,
+                              sw(train_comp_idx))
     p_fit <- fit_prop_nuisance(
-      p_features[train_idx, , drop = FALSE], D[train_idx], nuisance_method, num_threads
+      p_features[train_idx, , drop = FALSE], D[train_idx], nuisance_method,
+      num_threads, sw(train_idx)
     )
 
     # Second stage (Algorithm 1, step 2b): nu_0 regresses m_0's fitted
@@ -375,7 +397,9 @@ dr_ml_attgt <- function(gt_data,
       # trees that didn't include that row in their subsample, so they're
       # not self-referential the way an in-sample newdata prediction is.
       m_fitted_train <- predict_reg_nuisance_oob(m_fit)
-      nu_fit <- fit_reg_nuisance(p_features_train_comp, m_fitted_train, nuisance_method, num_threads)
+      nu_fit <- fit_reg_nuisance(p_features_train_comp, m_fitted_train,
+                                 nuisance_method, num_threads,
+                                 sw(train_comp_idx))
 
       # p_fit's OOB predictions come back for all of train_idx (treated +
       # control, in train_idx's order); subset down to the untreated units
@@ -383,21 +407,32 @@ dr_ml_attgt <- function(gt_data,
       p_fitted_all_oob <- predict_prop_nuisance_oob(p_fit)
       p_fitted_train <- p_fitted_all_oob[match(train_comp_idx, train_idx)]
       odds_fitted_train <- p_fitted_train / (1 - p_fitted_train)
-      omega_fit <- fit_reg_nuisance(m_features_train_comp, odds_fitted_train, nuisance_method, num_threads)
+      omega_fit <- fit_reg_nuisance(m_features_train_comp, odds_fitted_train,
+                                    nuisance_method, num_threads,
+                                    sw(train_comp_idx))
     } else if (has_bc) {
-      # nuisance_method == "parametric": no OOB equivalent for lm/glm, per
-      # the Details section -- root-n first stages don't need it anyway.
-      m_fitted_train <- predict_reg_nuisance(m_fit, m_features_train_comp, nuisance_method)
-      nu_fit <- fit_reg_nuisance(p_features_train_comp, m_fitted_train, nuisance_method, num_threads)
+      # nuisance_method == "parametric": no OOB equivalent for linear
+      # working models, per the Details section -- root-n first stages
+      # don't need it anyway.
+      m_fitted_train <- predict_reg_nuisance(m_fit, m_features_train_comp,
+                                             nuisance_method)
+      nu_fit <- fit_reg_nuisance(p_features_train_comp, m_fitted_train,
+                                 nuisance_method, num_threads,
+                                 sw(train_comp_idx))
 
-      p_fitted_train <- predict_prop_nuisance(p_fit, p_features_train_comp, nuisance_method)
+      p_fitted_train <- predict_prop_nuisance(p_fit, p_features_train_comp,
+                                              nuisance_method)
       odds_fitted_train <- p_fitted_train / (1 - p_fitted_train)
-      omega_fit <- fit_reg_nuisance(m_features_train_comp, odds_fitted_train, nuisance_method, num_threads)
+      omega_fit <- fit_reg_nuisance(m_features_train_comp, odds_fitted_train,
+                                    nuisance_method, num_threads,
+                                    sw(train_comp_idx))
     }
 
     # Evaluate all four nuisance functions on the held-out fold (step 3).
-    m_hat[eval_idx] <- predict_reg_nuisance(m_fit, m_features_eval, nuisance_method)
-    p_hat[eval_idx] <- predict_prop_nuisance(p_fit, p_features_eval, nuisance_method)
+    m_hat[eval_idx] <- predict_reg_nuisance(m_fit, m_features_eval,
+                                            nuisance_method)
+    p_hat[eval_idx] <- predict_prop_nuisance(p_fit, p_features_eval,
+                                             nuisance_method)
     nu_hat[eval_idx] <- if (has_bc) {
       predict_reg_nuisance(nu_fit, p_features_eval, nuisance_method)
     } else {
@@ -410,64 +445,105 @@ dr_ml_attgt <- function(gt_data,
     }
   }
 
-  # Doubly robust score (eqn:eif1 / eq:att-dr-sample in the paper)
-  phi1 <- (D / pi_hat) * DeltaY - (D / pi_hat) * nu_hat -
+  # Doubly robust score (eqn:eif1 / eq:att-dr-sample in the paper). With
+  # sampling weights, each unit's score is multiplied by its weight (mean 1
+  # in the cell) and pi-hat is the weighted share of treated units.
+  pi_hat <- mean(w * D)
+  score <- (D / pi_hat) * DeltaY - (D / pi_hat) * nu_hat -
     ((1 - D) / pi_hat) * (m_hat - nu_hat) * (p_hat / (1 - p_hat)) -
     ((1 - D) / pi_hat) * (DeltaY - m_hat) * omega_hat
+  phi1 <- w * score
 
   att_dr <- mean(phi1)
 
   # Influence function (Algorithm 1, step 5): corrects for pi-hat estimation
   # uncertainty on top of the doubly robust score's own first-order terms.
-  inf_func <- phi1 - att_dr - (att_dr / pi_hat) * (D - pi_hat)
+  # Without weights this is phi1 - att - (att / pi) (D - pi).
+  inf_func <- phi1 - att_dr * w * D / pi_hat
 
   extra_returns <- list(
-    group = this_g, time_period = this_tp,
+    group = cd$g, time_period = cd$tp,
     n_control = n0, n_treated = n1,
     est_method = "dr_ml", nuisance_method = nuisance_method,
-    bad_control_var = bc_var, n_folds = n_folds
+    bad_control_var = cd$bc_var, n_folds = n_folds
   )
 
   ptetools::attgt_if(attgt = att_dr, inf_func = inf_func,
                      extra_gt_returns = extra_returns)
 }
 
-# Fit a regression nuisance function (m_0, nu_0, or omega_0): a cross-fitted
-# random forest under nuisance_method = "ml", or OLS under
-# nuisance_method = "parametric".
-fit_reg_nuisance <- function(x_mat, y, nuisance_method, num_threads = NULL) {
-  if (nuisance_method == "ml") {
-    return(grf::regression_forest(X = x_mat, Y = y, num.threads = num_threads))
+# Cross-fitting fold of each unit. Without clusters, treated and comparison
+# units are each spread evenly over the folds at random (the draws are the
+# same as in earlier versions, so results for a given seed are unchanged).
+# With clusters (a vector aligned with D), whole clusters are assigned to
+# folds, clusters with treated units and those without each spread evenly.
+#
+# Arguments: D (treatment indicator), n_folds, cl (cluster of each unit, or
+#   NULL).
+# Returns: integer vector of folds, one per unit.
+bc_folds <- function(D, n_folds, cl = NULL) {
+  fold_ids <- rep(NA_integer_, length(D))
+  if (is.null(cl)) {
+    treated_idx <- which(D == 1)
+    comparison_idx <- which(D == 0)
+    fold_ids[treated_idx] <- sample(rep(1:n_folds,
+                                        length.out = length(treated_idx)))
+    fold_ids[comparison_idx] <- sample(rep(1:n_folds,
+                                           length.out = length(comparison_idx)))
+    return(fold_ids)
   }
-  df <- data.frame(x_mat)
-  df$.y <- y
-  stats::lm(.y ~ ., data = df)
+  clusters <- unique(cl)
+  has_treated <- clusters %in% unique(cl[D == 1])
+  cluster_fold <- integer(length(clusters))
+  for (grp in c(TRUE, FALSE)) {
+    idx <- which(has_treated == grp)
+    cluster_fold[idx] <- sample(rep(1:n_folds, length.out = length(idx)))
+  }
+  cluster_fold[match(cl, clusters)]
+}
+
+# Fit a regression nuisance function (m_0, nu_0, or omega_0): a random
+# forest under nuisance_method = "ml", or OLS under
+# nuisance_method = "parametric". `weights` are sampling weights (NULL for
+# none).
+fit_reg_nuisance <- function(x_mat, y, nuisance_method, num_threads = NULL,
+                             weights = NULL) {
+  if (nuisance_method == "ml") {
+    return(grf::regression_forest(X = x_mat, Y = y, sample.weights = weights,
+                                  num.threads = num_threads))
+  }
+  if (is.null(weights)) weights <- rep(1, length(y))
+  bc_fit(x_mat, y, weights, seq_along(y), D = NULL, warn = FALSE)
 }
 
 predict_reg_nuisance <- function(fit, newdata_mat, nuisance_method) {
   if (nuisance_method == "ml") {
     return(predict(fit, newdata = newdata_mat)$predictions)
   }
-  stats::predict(fit, newdata = data.frame(newdata_mat))
+  bc_fit_predict(fit, newdata_mat)
 }
 
-# Fit the propensity score p_2: a cross-fitted random forest under
+# Fit the propensity score p_2: a probability forest under
 # nuisance_method = "ml", or logistic regression under
-# nuisance_method = "parametric".
-fit_prop_nuisance <- function(x_mat, d, nuisance_method, num_threads = NULL) {
+# nuisance_method = "parametric". `weights` are sampling weights (NULL for
+# none).
+fit_prop_nuisance <- function(x_mat, d, nuisance_method, num_threads = NULL,
+                              weights = NULL) {
   if (nuisance_method == "ml") {
-    return(grf::probability_forest(X = x_mat, Y = as.factor(d), num.threads = num_threads))
+    return(grf::probability_forest(X = x_mat, Y = as.factor(d),
+                                   sample.weights = weights,
+                                   num.threads = num_threads))
   }
-  df <- data.frame(x_mat)
-  df$.d <- d
-  stats::glm(.d ~ ., data = df, family = stats::binomial())
+  if (is.null(weights)) weights <- rep(1, length(d))
+  bc_fit(x_mat, d, weights, seq_along(d), D = NULL, binary = TRUE,
+         warn = FALSE)
 }
 
 predict_prop_nuisance <- function(fit, newdata_mat, nuisance_method) {
   if (nuisance_method == "ml") {
     return(predict(fit, newdata = newdata_mat)$predictions[, 2])
   }
-  stats::predict(fit, newdata = data.frame(newdata_mat), type = "response")
+  bc_fit_predict(fit, newdata_mat)
 }
 
 # Out-of-bag predictions for a grf forest's own training data: calling
@@ -476,8 +552,8 @@ predict_prop_nuisance <- function(fit, newdata_mat, nuisance_method) {
 # an out-of-sample-like prediction obtained for free from the already-fit
 # forest. Used as the pseudo-outcome for nu_0/omega_0 (see the "ml" branch
 # of dr_ml_attgt()'s main loop) instead of predict(fit, newdata =
-# <training data>), which would be self-referential. ml-only: lm/glm (the
-# "parametric" nuisance_method) have no OOB equivalent.
+# <training data>), which would be self-referential. ml-only: linear
+# working models (the "parametric" nuisance_method) have no OOB equivalent.
 predict_reg_nuisance_oob <- function(fit) {
   predict(fit)$predictions
 }
