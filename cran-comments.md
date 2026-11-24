@@ -17,7 +17,7 @@ Results without weights are unchanged.
 ## Test environments
 
 - Local Ubuntu 26.04.1 LTS, R 4.5.2
-- GitHub Actions: TODO
+- GitHub Actions (all Status: OK, 0 errors | 0 warnings | 0 notes):
     - windows-latest (R release)
     - windows-latest (R devel)
     - macos-latest (R release)

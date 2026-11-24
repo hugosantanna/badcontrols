@@ -120,6 +120,8 @@ summary(res_imputation)
 
 ```{r}
 #| label: plot-event-study
+#| fig.cap: "Event study: effect of job displacement on log earnings, imputation estimator."
+#| fig.alt: "Event-study plot of the estimated effect of job displacement on log earnings by event time, with 95% confidence bands."
 #| warning: false
 #| message: false
 

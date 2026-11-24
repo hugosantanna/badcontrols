@@ -154,9 +154,12 @@ below.
 plot(res_imputation)
 ```
 
-![](precompiled-figures/bad-controls-coding-plot-event-study-1.png)
+![Event-study plot of the estimated effect of job displacement on log
+earnings by event time, with 95% confidence
+bands.](precompiled-figures/bad-controls-coding-plot-event-study-1.png)
 
-plot of chunk plot-event-study
+Event study: effect of job displacement on log earnings, imputation
+estimator.
 
 ### Other estimators
 

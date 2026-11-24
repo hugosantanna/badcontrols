@@ -52,7 +52,7 @@ where $\theta_t$ and $\eta_i$ are time and unit fixed effects, $D_{it}$ is the t
 
 - **Option 2: Drop the bad control:** In other words, run the regression above dropping the $\beta X_{it}$ term.  This approach avoids conditioning on a post-treatment variable, but it drops the covariate entirely.  In our application, this would mean that we would not even attempt to compare individuals in the same occupations at all.
 
-  In contrast to Option 1, Option 2 is very popular in empirical work.  To us, it seems like this has its own issues, that could be just as bad as including the bad control.  To drop the bad control entirely effectively says that the bad control was never needed as a covariate at all.  Or, in other words, the leading solution the bad control problem is to pretend that the covariate was never needed in the first place.
+  In contrast to Option 1, Option 2 is very popular in empirical work.  To us, it seems like this has its own issues, that could be just as bad as including the bad control.  To drop the bad control entirely effectively says that the bad control was never needed as a covariate at all.  Or, in other words, the leading solution to the bad control problem is to pretend that the covariate was never needed in the first place.
 
 ## Alternative approaches
 
@@ -79,7 +79,7 @@ The challenge is that the untreated potential version of the bad control, $X_{t^
 
 A very simple approach to dealing with a bad control is to condition only on its value on the pre-treatment period, $X_{t^*-1}$.  This is not so straightforward when implementing difference-in-differences via a TWFE regression, but it is straightforward with the @callaway-santanna-2021 estimator.  In fact, in their `R` implementation in the `did` package, the default approach to dealing with a time-varying covariate is to include its level in the pre-treatment period, which is exactly what we suggest here.
 
-What additional assumptions rationalize this approach?  In the paper, we provide two cases where it will hold.  One under the following unconfoundedness assumption for the bad control (we call this assumption "simple covariate unconfoundedness" in our paper):
+What additional assumptions rationalize this approach?  In the paper, we provide two cases where it will hold.  The first is when the following unconfoundedness assumption holds for the bad control (we call this assumption "simple covariate unconfoundedness" in our paper):
 
 $$
 X_{t^*}(0) \independent D
@@ -87,11 +87,11 @@ X_{t^*}(0) \independent D
 $$
 
 This assumption implies that we can learn about how the untreated bad control would have evolved in the absence of treatment, by comparing untreated units with the same pre-treatment value of the bad control and other covariates.  The post-treatment bad control does not
-need to be included as a covariate in the final outcome comparison as this assumption implies that it is already balanced between the treated and untreated group conditional on the pre-treatment bad control and other covariates.  The other case that rationalizes this approach is when the $X_{t^*}(0)$ is redundant in the parallel trends assumption after conditioning on $X_{t^*-1}$ and $Z$, i.e., it does not separately affect the trend in untreated potential outcomes after conditioning on the pre-treatment bad control and other covariates.
+need to be included as a covariate in the final outcome comparison as this assumption implies that it is already balanced between the treated and untreated group conditional on the pre-treatment bad control and other covariates.  The other case that rationalizes this approach is when $X_{t^*}(0)$ is redundant in the parallel trends assumption after conditioning on $X_{t^*-1}$ and $Z$, i.e., it does not separately affect the trend in untreated potential outcomes after conditioning on the pre-treatment bad control and other covariates.
 
 ## New Approach 2: Covariate unconfoundedness for the bad control
 
-The specific version of unconfoundedness that we discussed above leads to a convenient estimator, but it's not necessarily the most plausible one.  Notice that, the parallel trends assumption involved the *change* in untreated potential outcomes, while the left hand side involved the *level* of the bad control (rather than its change).  One would expect that the number of conditioning variables needed to make an unconfoundedness assumption plausible is larger for a level than a change, which suggests a modified unconfoundedness assumption (we call this assumption "covariate unconfoundedness" in our paper):
+The specific version of unconfoundedness that we discussed above leads to a convenient estimator, but it's not necessarily the most plausible one.  Notice that the parallel trends assumption involved the *change* in untreated potential outcomes, while the left hand side involved the *level* of the bad control (rather than its change).  One would expect that the number of conditioning variables needed to make an unconfoundedness assumption plausible is larger for a level than a change, which suggests a modified unconfoundedness assumption (we call this assumption "covariate unconfoundedness" in our paper):
 
 $$
 X_{t^*}(0) \independent D
@@ -104,7 +104,7 @@ $$
 \ATT = \E[\Delta Y_{t^*} \mid D=1] - \E\Big[ \E\big[ \E[\Delta Y_{t^*} \mid X_{t^*}, X_{t^*-1}, Z] \bigm| X_{t^*-1}, W, Z, D=0 \big] \Bigm| D=1 \Big]
 $$
 
-A rough explanation for this equation (starting from the inside out) is that we find the trend in outcomes over time as a function of $X_{t^*}, X_{t^*-1}, Z$ among untreated units.  Then, we account for the bad control being affected by the treatment by using the distribution of bad control from the untreated group given exogenous covariates $Z$ and $W$ but using the distribution of these from the treated group---you can see the paper for more details.
+A rough explanation for this equation (starting from the inside out) is that we find the trend in outcomes over time as a function of $X_{t^*}, X_{t^*-1}, Z$ among untreated units.  Then, we account for the bad control being affected by the treatment by using the distribution of the bad control from the untreated group given exogenous covariates $Z$ and $W$ but using the distribution of these from the treated group---you can see the paper for more details.
 
 `badcontrols` implements imputation, doubly robust, and machine learning estimators building on this result.
 

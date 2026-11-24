@@ -54,7 +54,7 @@ the regression or not (both of which have problems):
   To us, it seems like this has its own issues, that could be just as
   bad as including the bad control. To drop the bad control entirely
   effectively says that the bad control was never needed as a covariate
-  at all. Or, in other words, the leading solution the bad control
+  at all. Or, in other words, the leading solution to the bad control
   problem is to pretend that the covariate was never needed in the first
   place.
 
@@ -127,9 +127,9 @@ dealing with a time-varying covariate is to include its level in the
 pre-treatment period, which is exactly what we suggest here.
 
 What additional assumptions rationalize this approach? In the paper, we
-provide two cases where it will hold. One under the following
-unconfoundedness assumption for the bad control (we call this assumption
-“simple covariate unconfoundedness” in our paper):
+provide two cases where it will hold. The first is when the following
+unconfoundedness assumption holds for the bad control (we call this
+assumption “simple covariate unconfoundedness” in our paper):
 
 \\ X\_{t^\*}(0) \independent D \mid X\_{t^\*-1}, Z. \\
 
@@ -140,7 +140,7 @@ other covariates. The post-treatment bad control does not need to be
 included as a covariate in the final outcome comparison as this
 assumption implies that it is already balanced between the treated and
 untreated group conditional on the pre-treatment bad control and other
-covariates. The other case that rationalizes this approach is when the
+covariates. The other case that rationalizes this approach is when
 \\X\_{t^\*}(0)\\ is redundant in the parallel trends assumption after
 conditioning on \\X\_{t^\*-1}\\ and \\Z\\, i.e., it does not separately
 affect the trend in untreated potential outcomes after conditioning on
@@ -150,8 +150,8 @@ the pre-treatment bad control and other covariates.
 
 The specific version of unconfoundedness that we discussed above leads
 to a convenient estimator, but it’s not necessarily the most plausible
-one. Notice that, the parallel trends assumption involved the *change*
-in untreated potential outcomes, while the left hand side involved the
+one. Notice that the parallel trends assumption involved the *change* in
+untreated potential outcomes, while the left hand side involved the
 *level* of the bad control (rather than its change). One would expect
 that the number of conditioning variables needed to make an
 unconfoundedness assumption plausible is larger for a level than a
@@ -176,7 +176,7 @@ A rough explanation for this equation (starting from the inside out) is
 that we find the trend in outcomes over time as a function of
 \\X\_{t^\*}, X\_{t^\*-1}, Z\\ among untreated units. Then, we account
 for the bad control being affected by the treatment by using the
-distribution of bad control from the untreated group given exogenous
+distribution of the bad control from the untreated group given exogenous
 covariates \\Z\\ and \\W\\ but using the distribution of these from the
 treated group—you can see the paper for more details.
 
@@ -216,7 +216,7 @@ identification but it is also affected by the treatment.
 
 ## References
 
-Angrist, Joshua D, and Jorn-Steffen Pischke. 2008. *Mostly Harmless
+Angrist, Joshua D, and Jörn-Steffen Pischke. 2008. *Mostly Harmless
 Econometrics: An Empiricist’s Companion*. Princeton University Press.
 
 Athey, Susan, and Guido Imbens. 2006. “Identification and Inference in
