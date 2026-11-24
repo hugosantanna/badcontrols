@@ -1,53 +1,45 @@
-## Resubmission
+## Submission summary
 
-This is a resubmission of version 1.0.0, rejected by the incoming pre-tests
-with the following NOTE on r-devel-linux-x86_64-debian-gcc:
+This is a minor release (1.0.1 -> 1.1.0). It requires `ptetools`
+(>= 1.1.0), now on CRAN. Main changes (see NEWS.md):
 
-    Running R code in 'testthat.R' had CPU time 4.6 times elapsed time
+* Sampling weights (`weightsname`) now work: previously they only entered
+  the aggregation across groups, so group-time estimates and their
+  standard errors were unweighted.
+* New `clustervars` argument for clustered standard errors.
+* Covariate formulas can transform variables (e.g. `~ factor(state)`),
+  which previously failed or was silently ignored.
+* Warnings from individual group-time cells (e.g. covariates dropped for
+  lack of overlap) are collected and reported once per call.
 
-The `dr_ml` tests call `grf`, which by default uses every available core.
-The tests now pass `num_threads = 2` to every `grf`-backed call, keeping
-`R CMD check` within CRAN's two-core limit. Verified locally with
-`_R_CHECK_LIMIT_CORES_=TRUE`. The package code is unchanged; the version was
-bumped to 1.0.1 for the resubmission.
-
-The incoming-feasibility NOTE "Possibly misspelled words in DESCRIPTION:
-Caetano, Callaway, Sant'Anna" lists the surnames of the authors of the paper
-the package implements; they are spelled correctly.
+Results without weights are unchanged.
 
 ## Test environments
 
-- Local Ubuntu 24.04.4 LTS, R 4.6.1, `rcmdcheck::rcmdcheck(args = c("--as-cran"))`:
-    - 0 errors, 0 warnings, 1 note (see below).
-- Local macOS (Apple Silicon), R 4.6.0, `R CMD check --as-cran` with
-  `_R_CHECK_LIMIT_CORES_=TRUE`: 0 errors, 0 warnings, 1 note (new submission).
-- GitHub Actions:
-    - Windows-latest (R release)
-    - Windows-latest (R devel)
-    - macOS-latest (R release)
-    - Ubuntu-latest (R release)
-    - Ubuntu-latest (R devel)
-    - All checks passed without issues.
+- Local Ubuntu 26.04.1 LTS, R 4.5.2
+- GitHub Actions: TODO
+    - windows-latest (R release)
+    - windows-latest (R devel)
+    - macos-latest (R release)
+    - ubuntu-latest (R release)
+    - ubuntu-latest (R devel)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+`rcmdcheck::rcmdcheck(args = "--as-cran")`:
 
-* checking CRAN incoming feasibility ... NOTE — New submission (expected;
-  this is the package's first release).
+0 errors | 0 warnings | 0 notes
 
-## Downstream dependencies
+(Locally, there are two NOTEs that come from the check machine, not the
+package: HTML validation and math rendering in the manual were skipped
+because HTML Tidy and V8 are not installed, and the current time could not
+be verified.)
 
-`badcontrols` has no reverse dependencies (this is a new package), checked
-via `revdeplite::revdeplite()`.
+The incoming-feasibility check has previously flagged "Caetano, Callaway,
+Sant'Anna" as possibly misspelled words in DESCRIPTION; these are the
+correctly spelled surnames of the authors of the paper the package
+implements.
 
-## Additional comments
+## Reverse dependencies
 
-* This is the first CRAN release of `badcontrols`, which implements
-  imputation, doubly robust, and machine-learning estimators for
-  difference-in-differences designs where a time-varying covariate is
-  affected by the treatment ("bad controls"), based on Caetano, Callaway,
-  Payne, and Sant'Anna (2026) <doi:10.48550/arXiv.2608.03881>.
-* Two vignettes are included: a conceptual overview of the identification
-  strategies, and a coding walkthrough on a real NLSY79 application
-  dataset bundled with the package.
+There are currently no reverse dependencies on CRAN.

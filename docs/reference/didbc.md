@@ -26,6 +26,7 @@ didbc(
   anticipation = 0,
   base_period = "varying",
   weightsname = NULL,
+  clustervars = NULL,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -75,7 +76,12 @@ didbc(
 - xformula:
 
   One-sided formula for general exogenous covariates, entered as their
-  pre-treatment-period level (default `~1`)
+  pre-treatment-period level (default `~1`). Terms can transform
+  variables, e.g. `~ factor(state) + I(z^2)`; this holds for all the
+  covariate formulas. Covariates that do not vary among comparison units
+  but do among treated units are dropped, with a warning that the
+  estimates extrapolate for those treated units (see
+  [`ptetools::check_overlap()`](https://rdrr.io/pkg/ptetools/man/check_overlap.html)).
 
 - d_covs_formula:
 
@@ -139,7 +145,21 @@ didbc(
 
 - weightsname:
 
-  Name of a sampling-weights variable in `data` (default `NULL`)
+  Name of a sampling-weights variable in `data` (default `NULL`).
+  Weights must be non-negative and constant over time within each unit.
+  They enter every regression and nuisance function, the averages over
+  treated units, the influence functions (so the standard errors), and
+  the aggregation across groups.
+
+- clustervars:
+
+  Name of a variable in `data` to cluster standard errors on, in
+  addition to `idname` (as in
+  [`did::att_gt()`](https://bcallaway11.github.io/did/reference/att_gt.html)):
+  one variable, constant over time within each unit (default `NULL`,
+  clustering at the unit level). Applies to analytical and bootstrap
+  standard errors; with `est_method = "dr_ml"`, cross-fitting folds are
+  also assigned by cluster.
 
 - cband:
 
@@ -178,8 +198,8 @@ didbc(
   For `est_method = "dr_ml"` only: if any unit's fitted propensity (from
   a preliminary, non-cross-fit fit) exceeds this value in a (g,t) cell,
   estimation falls back to the imputation estimator for that cell, with
-  a warning naming the group, time period, and offending unit IDs.
-  Default 0.99.
+  a warning naming the group, time period, and number of units above the
+  threshold. Default 0.99.
 
 - min_group_size:
 
@@ -187,7 +207,8 @@ didbc(
   units than the number of propensity-score covariates plus
   `min_group_size`, estimation falls back to the imputation estimator
   for that cell, with a warning naming the group, time period, and
-  treated count – a separate trigger from `overlap_threshold`, since
+  treated count (each kind of warning is given once per call, listing
+  the cells) – a separate trigger from `overlap_threshold`, since
   fitting the propensity score needs a nontrivial treated sample to
   identify at all, relative to how many covariates it has to fit, which
   can fail even under good covariate overlap. Default 5, matching
@@ -283,17 +304,5 @@ res_imp <- didbc(
   xformula = ~Z,
   est_method = "imputation"
 )
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
 # }
 ```

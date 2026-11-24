@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,7 +115,7 @@ standalone quarto render and the pkgdown site.
 \E[\Delta Y_{t^*}(0) \mid X_{t^*}(0), X_{t^*-1}, Z, D=1] =
 \E[\Delta Y_{t^*}(0) \mid X_{t^*}(0), X_{t^*-1}, Z, D=0],
 \]</span></p>
-<p>This assumption is exactly the same as the conditional parallel trends assumptions in the difference-in-differences literature <span class="citation" data-cites="heckman-ichimura-todd-1997 callaway-santanna-2021">(<a href="#ref-heckman-ichimura-todd-1997" role="doc-biblioref">Heckman et al. 1997</a>; <a href="#ref-callaway-santanna-2021" role="doc-biblioref">Callaway and Sant’Anna 2021</a>)</span>. It says that, in the absence of the treatment, the trend in untreated potential outcomes would have been the same for treated and untreated units with the same covariates. Notice that, unlike Options 1 and 2 above, this assumption uses <span class="math inline">\(X_{it}\)</span> as a genuine control while also allowing for it to be affected by the treatment.</p>
+<p>This assumption is exactly the same as the conditional parallel trends assumptions in the difference-in-differences literature <span class="citation" data-cites="heckman-ichimura-todd-1997 callaway-santanna-2021">(<a href="#ref-heckman-ichimura-todd-1997" role="doc-biblioref">Heckman, Ichimura, and Todd 1997</a>; <a href="#ref-callaway-santanna-2021" role="doc-biblioref">Callaway and Sant’Anna 2021</a>)</span>. It says that, in the absence of the treatment, the trend in untreated potential outcomes would have been the same for treated and untreated units with the same covariates. Notice that, unlike Options 1 and 2 above, this assumption uses <span class="math inline">\(X_{it}\)</span> as a genuine control while also allowing for it to be affected by the treatment.</p>
 <p>The challenge is that the untreated potential version of the bad control, <span class="math inline">\(X_{t^*}(0)\)</span>, is not observed for treated units. This makes the explicit comparison between treated and untreated units with the same <span class="math inline">\(X_{t^*}(0)\)</span> infeasible. We propose two approaches to dealing with this challenge, though we note that any approach is going to require some additional assumptions, and so a real possibility in a given application is that the researcher is just not able to credibly recover the <span class="math inline">\(\ATT\)</span> in the presence of a bad control.</p>
 </section><section class="level2"><h2 id="new-approach-1-condition-on-the-pre-treatment-bad-control">New Approach 1: Condition on the pre-treatment bad control<a class="anchor" aria-label="anchor" href="#new-approach-1-condition-on-the-pre-treatment-bad-control"></a>
 </h2>
@@ -148,7 +148,7 @@ X_{t^*}(0) \independent D
 <p>Our paper provides new approaches to dealing with bad controls in difference-in-differences applications. Our approaches respect the nature of a bad control, namely, that it is needed as a covariate for identification but it is also affected by the treatment.</p>
 </section><section class="level2 unnumbered"><h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-angrist-pischke-2008" class="csl-entry" role="listitem">
 Angrist, Joshua D, and Jorn-Steffen Pischke. 2008. <em>Mostly Harmless Econometrics: An Empiricist’s Companion</em>. Princeton University Press.
 </div>
@@ -159,7 +159,7 @@ Athey, Susan, and Guido Imbens. 2006. <span>“Identification and Inference in N
 Caetano, Carolina, Brantly Callaway, Stroud Payne, and Hugo Sant’Anna. 2026. <span>“Difference-in-Differences with Bad Controls.”</span> <em>arXiv Preprint arXiv:2608.03881</em>. <a href="https://arxiv.org/abs/2608.03881" class="external-link">https://arxiv.org/abs/2608.03881</a>.
 </div>
 <div id="ref-callaway-li-2019" class="csl-entry" role="listitem">
-Callaway, Brantly, and Tong Li. 2019. <span>“Quantile Treatment Effects in Difference in Differences Models with Panel Data.”</span> <em>Quantitative Economics</em> 10 (4): 1579–618.
+Callaway, Brantly, and Tong Li. 2019. <span>“Quantile Treatment Effects in Difference in Differences Models with Panel Data.”</span> <em>Quantitative Economics</em> 10 (4): 1579–1618.
 </div>
 <div id="ref-callaway-santanna-2021" class="csl-entry" role="listitem">
 Callaway, Brantly, and Pedro HC Sant’Anna. 2021. <span>“Difference-in-Differences with Multiple Time Periods.”</span> <em>Journal of Econometrics</em> 225 (2): 200–230.
@@ -169,89 +169,107 @@ Heckman, James, Hidehiko Ichimura, and Petra Todd. 1997. <span>“Matching as an
 </div>
 </div>
 </section><script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'light-border',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config);
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
     }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
         }
-      } else {
-        return undefined;
       }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'light-border',
+      placement: 'bottom-start',
     };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
-        });
-      }
+    if (contentFn) {
+      config.content = contentFn;
     }
-  });
-  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config);
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 

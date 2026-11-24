@@ -17,57 +17,11 @@ when `bad_control_identification_strategy = "did"`.
 ## Usage
 
 ``` r
-imputation_did(
-  wide_data,
-  pre_data,
-  post_data,
-  D,
-  n,
-  x_names,
-  dx_names,
-  bc_cov_names,
-  bc_dcov_names,
-  comparison_idx,
-  bad_control_formula
-)
+imputation_did(cd)
 ```
 
 ## Arguments
 
-- wide_data:
+- cd:
 
-  one row per unit, as constructed by
-  [`imputation_attgt`](https://hsantanna.org/badcontrols/reference/imputation_attgt.md)
-
-- pre_data, post_data:
-
-  the pre/post-period long-format subsets of the original `gt_data`, as
-  constructed by
-  [`imputation_attgt`](https://hsantanna.org/badcontrols/reference/imputation_attgt.md)
-
-- D:
-
-  treatment indicator vector, aligned to `wide_data`
-
-- n:
-
-  number of units (`nrow(wide_data)`)
-
-- x_names, dx_names:
-
-  names of the general exogenous covariate columns (level and change,
-  respectively) already merged into `wide_data`
-
-- bc_cov_names, bc_dcov_names:
-
-  names of the bad-control auxiliary covariate columns (level and
-  change, respectively, W in the paper) already merged into `wide_data`
-
-- comparison_idx:
-
-  row indices of `wide_data` in the comparison (untreated) group
-
-- bad_control_formula:
-
-  One-sided formula naming the bad control variable, or `NULL` for no
-  bad control at all
+  one (g,t) cell's data, from `bc_cell_data()`

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,8 @@
 
 <dt id="arg-xformula">xformula<a class="anchor" aria-label="anchor" href="#arg-xformula"></a></dt>
 <dd><p>One-sided formula for general exogenous covariates,
-entered as their pre-treatment-period level (default <code>~1</code>)</p></dd>
+entered as their pre-treatment-period level (default <code>~1</code>).
+Terms can transform variables, e.g. <code>~ factor(state) + I(z^2)</code>.</p></dd>
 
 
 <dt id="arg-bad-control-formula">bad_control_formula<a class="anchor" aria-label="anchor" href="#arg-bad-control-formula"></a></dt>
@@ -128,11 +129,15 @@ and does not distinguish a binary bad control.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function only handles the shared leadin (pivoting <code>gt_data</code> to
-one row per unit, and constructing the covariate columns/names), then
+    <p>This function only builds the cell's data (one row per unit, with its
+sampling weight and covariate matrices; see <code>bc_cell_data()</code>), then
 dispatches to <code><a href="imputation_unconfoundedness.html">imputation_unconfoundedness</a></code> or
 <code><a href="imputation_did.html">imputation_did</a></code> depending on
 <code>bad_control_identification_strategy</code>.</p>
+<p>With sampling weights (<code>weightsname</code> in <code><a href="didbc.html">didbc()</a></code>), both steps
+are weighted regressions, the ATT is the weighted mean over treated units,
+and the influence function carries each unit's weight, so standard errors
+are for the weighted estimator.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,21 @@
       <small>Source: <a href="https://github.com/hugosantanna/badcontrols/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="badcontrols-110">badcontrols 1.1.0<a class="anchor" aria-label="anchor" href="#badcontrols-110"></a></h2>
+<ul><li>Sampling weights (<code>weightsname</code>) now work. They were passed on to ptetools, which only used them to aggregate across groups, so <code>ATT(g,t)</code> and its standard errors were those of the unweighted estimator. They now enter both imputation estimators (each regression, the average over treated units and the influence function, including the logit for a binary bad control) and <code>dr_ml</code> (every nuisance function, with <code>grf</code>’s <code>sample.weights</code> for forests, and the doubly robust score). Integer weights give the same estimates as duplicating units; without a bad control, the weighted imputation estimator matches <code>did::att_gt(est_method = "reg")</code> with weights, standard errors included. Results without weights are unchanged.</li>
+<li>New <code>clustervars</code> argument to cluster standard errors at a level above the unit, as in <code><a href="https://bcallaway11.github.io/did/reference/att_gt.html" class="external-link">did::att_gt()</a></code>: one variable, constant within each unit. It applies to analytical and bootstrap standard errors (through ptetools). With <code>est_method = "dr_ml"</code>, cross-fitting folds are also assigned by cluster, so no cluster has units in both the training and held-out folds.</li>
+<li>Covariate formulas can now transform variables, e.g. <code>xformula = ~ factor(state) + I(z^2)</code> or <code>bad_control_cov_formula = ~ log(w)</code>. Transformed terms in <code>xformula</code> failed with “object not found”, and in the other covariate formulas the transformation was silently ignored. <code>est_method = "dr_ml"</code> with <code>nuisance_method = "ml"</code> now also accepts factor and character covariates (they used to fail inside <code>grf</code>). A transformed <code>bad_control_formula</code> (e.g. <code>~ log(x)</code>) now gives an error instead of silently using the untransformed variable.</li>
+<li>When a covariate does not vary among comparison units (given the others) but does among treated units, such as a dummy for a region with treated units only, it is now dropped with a warning that the estimates extrapolate for those treated units, as in ptetools. Such covariates used to be dropped silently by <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code>, or make the influence function fail. Duplicated covariates and empty factor levels are dropped silently.</li>
+<li>Warnings are now given once per call, listing the group-time cells, instead of once per cell (and again for every empirical bootstrap draw): <code>dr_ml</code>’s fallbacks to the imputation estimator (too few treated units, or propensity scores above <code>overlap_threshold</code>, now reported as the number of units rather than their ids), and change covariates that are dropped because their change is the same for every unit.</li>
+<li>
+<code>boot_type = "empirical"</code> no longer warns “aggte_fun not specified” (from ptetools).</li>
+<li>Requires ptetools (&gt;= 1.1.0).</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.1" id="badcontrols-101">badcontrols 1.0.1<a class="anchor" aria-label="anchor" href="#badcontrols-101"></a></h2><p class="text-muted">CRAN release: 2026-09-12</p>
+<ul><li>Tests now pin <code>num_threads = 2</code> for the <code>grf</code>-backed estimators so that <code>R CMD check</code> stays within CRAN’s two-core limit. No user-facing changes.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="badcontrols-100">badcontrols 1.0.0<a class="anchor" aria-label="anchor" href="#badcontrols-100"></a></h2>
 <ul><li>First CRAN release.</li>

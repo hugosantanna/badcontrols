@@ -22,6 +22,7 @@ dr_ml_attgt(
   min_group_size = 5,
   n_folds = 5,
   num_threads = NULL,
+  clustervars = NULL,
   ...
 )
 ```
@@ -112,6 +113,11 @@ dr_ml_attgt(
   machine. Unused under `nuisance_method = "parametric"` (`lm`/`glm`
   have no thread concept).
 
+- clustervars:
+
+  Name of the cluster variable in `gt_data`, or `NULL` (the default). If
+  given, cross-fitting folds are assigned by cluster; see Details.
+
 - ...:
 
   additional arguments (unused)
@@ -196,9 +202,10 @@ needs its own first-stage correction terms that this function's
 nuisances don't have:
 
 1.  **Small treated group.** If the cell has fewer treated units than
-    the number of p_2 covariates plus `min_group_size`, a warning names
-    the group, time period, and treated count. Fitting p_2 needs a
-    nontrivial treated sample to identify at all, relative to how many
+    the number of p_2 covariates plus `min_group_size`.
+    [`didbc()`](https://hsantanna.org/badcontrols/reference/didbc.md)
+    warns once, listing the cells and treated counts. Fitting p_2 needs
+    a nontrivial treated sample to identify at all, relative to how many
     covariates it has to fit (a logit can hit perfect separation, a
     `probability_forest` is essentially memorizing a handful of points),
     which can happen even when the population-level covariate
@@ -206,8 +213,28 @@ nuisances don't have:
 
 2.  **Overlap.** Before cross-fitting, a preliminary propensity model
     (not used in the final estimation) is fit once on the whole cell: if
-    any unit's fitted propensity exceeds `overlap_threshold`, a warning
-    names the group, time period, and offending unit IDs.
+    any unit's fitted propensity exceeds `overlap_threshold`.
+    [`didbc()`](https://hsantanna.org/badcontrols/reference/didbc.md)
+    warns once, listing the cells and the number of units above the
+    threshold.
+
+**Sampling weights.** With `weightsname` in
+[`didbc()`](https://hsantanna.org/badcontrols/reference/didbc.md), every
+nuisance function is fit with the sampling weights (as `sample.weights`
+in `grf`, or as regression weights), and the doubly robust score, the
+share of treated units and the influence function are weighted.
+
+**Clustering.** With `clustervars`, the cross-fitting folds are assigned
+by cluster, so that no cluster has units in both the training and
+held-out folds, as is usual for cross-fitting with dependent data
+(Chernozhukov et al. 2018). Cluster-robust standard errors themselves
+come from `ptetools`.
+
+**Covariates.** Covariate formulas can transform variables (e.g.
+`~ factor(state) + I(z^2)`); factors are expanded into dummies for
+`grf`. With `nuisance_method = "parametric"`, covariates that are
+collinear among the units a model is fit on are dropped, with a warning
+when the outcome model would then extrapolate for treated units.
 
 ## References
 
@@ -215,6 +242,10 @@ Caetano, C., Callaway, B., Payne, S., and Sant'Anna, H. (2026).
 "Difference-in-Differences with Bad Controls." arXiv preprint
 arXiv:2608.03881.
 [doi:10.48550/arXiv.2608.03881](https://doi.org/10.48550/arXiv.2608.03881)
+
+Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C.,
+Newey, W., and Robins, J. (2018). "Double/Debiased Machine Learning for
+Treatment and Structural Parameters." *The Econometrics Journal*.
 
 Sant'Anna, P.H.C. and Zhao, J. (2020). "Doubly Robust
 Difference-in-Differences Estimators." *Journal of Econometrics*.

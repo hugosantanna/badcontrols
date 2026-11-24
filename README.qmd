@@ -51,6 +51,12 @@ which follows a syntax similar to `did::att_gt()` and
 
 ## Installation
 
+The released version can be installed from CRAN:
+
+```r
+install.packages("badcontrols")
+```
+
 The development version can be installed from GitHub:
 
 ```r

@@ -21,7 +21,7 @@ presence of post-treatment covariates (bad controls)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,7 @@ presence of post-treatment covariates (bad controls).</p>
 <span>  min_group_size <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  n_folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  num_threads <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clustervars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -166,6 +167,12 @@ forest fit claim every core on the machine. Unused under
 thread concept).</p></dd>
 
 
+<dt id="arg-clustervars">clustervars<a class="anchor" aria-label="anchor" href="#arg-clustervars"></a></dt>
+<dd><p>Name of the cluster variable in <code>gt_data</code>, or
+<code>NULL</code> (the default). If given, cross-fitting folds are assigned
+by cluster; see Details.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>additional arguments (unused)</p></dd>
 
@@ -235,8 +242,8 @@ whole (g,t) cell, rather than dropping p_2/omega_0 alone – doing that
 would leave a moment that is not Neyman orthogonal, which is exactly why
 <code><a href="imputation_attgt.html">imputation_attgt()</a></code> needs its own first-stage correction terms
 that this function's nuisances don't have:</p><ol><li><p><strong>Small treated group.</strong> If the cell has fewer treated
-units than the number of p_2 covariates plus <code>min_group_size</code>,
-a warning names the group, time period, and treated count. Fitting
+units than the number of p_2 covariates plus <code>min_group_size</code>.
+<code><a href="didbc.html">didbc()</a></code> warns once, listing the cells and treated counts. Fitting
 p_2 needs a nontrivial treated sample to identify at all, relative
 to how many covariates it has to fit (a logit can hit perfect
 separation, a <code>probability_forest</code> is essentially memorizing a
@@ -246,14 +253,33 @@ overlap below.</p></li>
 <li><p><strong>Overlap.</strong> Before cross-fitting, a preliminary propensity
 model (not used in the final estimation) is fit once on the whole
 cell: if any unit's fitted propensity exceeds
-<code>overlap_threshold</code>, a warning names the group, time period,
-and offending unit IDs.</p></li>
-</ol></div>
+<code>overlap_threshold</code>. <code><a href="didbc.html">didbc()</a></code> warns once, listing the
+cells and the number of units above the threshold.</p></li>
+</ol><p><strong>Sampling weights.</strong> With <code>weightsname</code> in <code><a href="didbc.html">didbc()</a></code>,
+every nuisance function is fit with the sampling weights (as
+<code>sample.weights</code> in <code>grf</code>, or as regression weights), and the
+doubly robust score, the share of treated units and the influence
+function are weighted.</p>
+<p><strong>Clustering.</strong> With <code>clustervars</code>, the cross-fitting folds
+are assigned by cluster, so that no cluster has units in both the
+training and held-out folds, as is usual for cross-fitting with
+dependent data (Chernozhukov et al. 2018). Cluster-robust standard
+errors themselves come from <code>ptetools</code>.</p>
+<p><strong>Covariates.</strong> Covariate formulas can transform variables (e.g.
+<code>~ factor(state) + I(z^2)</code>); factors are expanded into dummies
+for <code>grf</code>. With <code>nuisance_method = "parametric"</code>, covariates
+that are collinear among the units a model is fit on are dropped, with a
+warning when the outcome model would then extrapolate for treated
+units.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Caetano, C., Callaway, B., Payne, S., and Sant'Anna, H. (2026).
 "Difference-in-Differences with Bad Controls." arXiv preprint
 arXiv:2608.03881. <a href="https://doi.org/10.48550/arXiv.2608.03881" class="external-link">doi:10.48550/arXiv.2608.03881</a></p>
+<p>Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C.,
+Newey, W., and Robins, J. (2018). "Double/Debiased Machine Learning for
+Treatment and Structural Parameters." <em>The Econometrics Journal</em>.</p>
 <p>Sant'Anna, P.H.C. and Zhao, J. (2020). "Doubly Robust
 Difference-in-Differences Estimators." <em>Journal of Econometrics</em>.</p>
 <p>Wager, S. and Athey, S. (2018). "Estimation and Inference of

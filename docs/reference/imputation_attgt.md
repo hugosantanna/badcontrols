@@ -27,7 +27,8 @@ imputation_attgt(
 - xformula:
 
   One-sided formula for general exogenous covariates, entered as their
-  pre-treatment-period level (default `~1`)
+  pre-treatment-period level (default `~1`). Terms can transform
+  variables, e.g. `~ factor(state) + I(z^2)`.
 
 - bad_control_formula:
 
@@ -79,10 +80,16 @@ imputation_attgt(
 
 ## Details
 
-This function only handles the shared leadin (pivoting `gt_data` to one
-row per unit, and constructing the covariate columns/names), then
+This function only builds the cell's data (one row per unit, with its
+sampling weight and covariate matrices; see `bc_cell_data()`), then
 dispatches to
 [`imputation_unconfoundedness`](https://hsantanna.org/badcontrols/reference/imputation_unconfoundedness.md)
 or
 [`imputation_did`](https://hsantanna.org/badcontrols/reference/imputation_did.md)
 depending on `bad_control_identification_strategy`.
+
+With sampling weights (`weightsname` in
+[`didbc()`](https://hsantanna.org/badcontrols/reference/didbc.md)), both
+steps are weighted regressions, the ATT is the weighted mean over
+treated units, and the influence function carries each unit's weight, so
+standard errors are for the weighted estimator.

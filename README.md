@@ -4,7 +4,7 @@
 
 <!-- badges: start -->
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/hugosantanna/badcontrols)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/hugosantanna/badcontrols)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.1-blue.svg)](https://cran.r-project.org/)
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPL%20v3-green.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -54,6 +54,12 @@ doubly robust, and machine-learning estimators. The main function is
   vignette](https://hsantanna.org/badcontrols/articles/bad-controls-coding.html)
 
 ## Installation
+
+The released version can be installed from CRAN:
+
+``` r
+install.packages("badcontrols")
+```
 
 The development version can be installed from GitHub:
 
@@ -109,15 +115,15 @@ summary(res)
 
     Overall ATT:  
         ATT    Std. Error     [ 95%  Conf. Int.]  
-     1.4559        0.0304     1.3964      1.5154 *
+     1.4559        0.0306     1.3959      1.5159 *
 
 
     Dynamic Effects:
      Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  
              -2  -0.0323     0.0369         -0.1047      0.0401  
-             -1   0.0780     0.0315          0.0163      0.1397 *
+             -1   0.0780     0.0315          0.0162      0.1397 *
               0   1.0931     0.0239          1.0462      1.1400 *
-              1   1.7832     0.0368          1.7111      1.8553 *
+              1   1.7832     0.0369          1.7110      1.8554 *
               2   2.4412     0.0539          2.3356      2.5468 *
     ---
     Signif. codes: `*' confidence band does not cover 0
@@ -146,13 +152,13 @@ To cite the `badcontrols` package itself:
 
 > Caetano, C., Callaway, B., Payne, S., and Sant’Anna, H. (2026).
 > badcontrols: Difference-in-Differences with Bad Controls. R package
-> version 1.0.0. https://github.com/hugosantanna/badcontrols
+> version 1.1.0. https://github.com/hugosantanna/badcontrols
 
     @Manual{caetano2026badcontrolspkg,
       title  = {{badcontrols}: Difference-in-Differences with Bad Controls},
       author = {Carolina Caetano and Brantly Callaway and Stroud Payne and Hugo Sant'Anna},
       year   = {2026},
-      note   = {R package version 1.0.0},
+      note   = {R package version 1.1.0},
       url    = {https://github.com/hugosantanna/badcontrols}
     }
 
@@ -162,7 +168,8 @@ GPL (\>= 3)
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-caetano-callaway-payne-santanna-2026" class="csl-entry">
 

@@ -23,6 +23,7 @@ Imports:
     ptetools (>= 1.1.0),
     stats
 Suggests:
+    did,
     grf (>= 2.0.0),
     testthat (>= 3.0.0),
     knitr,

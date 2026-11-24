@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,8 +91,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>The development version can be installed from GitHub:</p>
+<p>The released version can be installed from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"badcontrols"</span><span class="op">)</span></span></code></pre></div>
+<p>The development version can be installed from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"hugosantanna/badcontrols"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -100,20 +103,20 @@
 <h2 id="basic-example">Basic example<a class="anchor" aria-label="anchor" href="#basic-example"></a>
 </h2>
 <p>The package includes a simulation with a treatment-affected covariate <code>X</code> and exogenous covariate <code>Z</code>. The demo here is based on the covariate unconfoundedness assumption (New Approach 2 above), where we assume that unconfoundedness holds for the bad control after conditioning on the exogenous covariate <code>Z</code>, the pre-treatment value of the bad control, and the lagged outcome. The data that we generate below is a panel with 2000 units and 4 periods.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hugosantanna/badcontrols" class="external-link">badcontrols</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_bad_controls.html">simulate_bad_controls</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2000</span>, T_max <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>  id period G D            Y           X          Z          W</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="dv">1</span>  <span class="dv">1</span>      <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.709723760</span> <span class="sc">-</span><span class="fl">1.05953298</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="dv">2</span>  <span class="dv">1</span>      <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.564713922</span> <span class="sc">-</span><span class="fl">1.76561193</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="dv">3</span>  <span class="dv">1</span>      <span class="dv">3</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">2.423375081</span> <span class="sc">-</span><span class="fl">1.63998935</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="dv">4</span>  <span class="dv">1</span>      <span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.494701781</span> <span class="sc">-</span><span class="fl">1.16835526</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="dv">5</span>  <span class="dv">2</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">0.003018587</span> <span class="sc">-</span><span class="fl">0.04756332</span>  <span class="fl">0.2774292</span> <span class="sc">-</span><span class="fl">0.1592186</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="dv">6</span>  <span class="dv">2</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="dv">1</span>  <span class="fl">1.833864636</span>  <span class="fl">0.85624078</span>  <span class="fl">0.2774292</span> <span class="sc">-</span><span class="fl">0.1592186</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>  id period G D            Y           X          Z          W</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="dv">1</span>  <span class="dv">1</span>      <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.709723760</span> <span class="sc">-</span><span class="fl">1.05953298</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="dv">2</span>  <span class="dv">1</span>      <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.564713922</span> <span class="sc">-</span><span class="fl">1.76561193</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="dv">3</span>  <span class="dv">1</span>      <span class="dv">3</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">2.423375081</span> <span class="sc">-</span><span class="fl">1.63998935</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="dv">4</span>  <span class="dv">1</span>      <span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">1.494701781</span> <span class="sc">-</span><span class="fl">1.16835526</span> <span class="sc">-</span><span class="fl">1.2070657</span> <span class="sc">-</span><span class="fl">1.3337493</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="dv">5</span>  <span class="dv">2</span>      <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="sc">-</span><span class="fl">0.003018587</span> <span class="sc">-</span><span class="fl">0.04756332</span>  <span class="fl">0.2774292</span> <span class="sc">-</span><span class="fl">0.1592186</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="dv">6</span>  <span class="dv">2</span>      <span class="dv">2</span> <span class="dv">2</span> <span class="dv">1</span>  <span class="fl">1.833864636</span>  <span class="fl">0.85624078</span>  <span class="fl">0.2774292</span> <span class="sc">-</span><span class="fl">0.1592186</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/didbc.html">didbc</a></span><span class="op">(</span></span>
 <span>  yname <span class="op">=</span> <span class="st">"Y"</span>,</span>
 <span>  gname <span class="op">=</span> <span class="st">"G"</span>,</span>
@@ -129,20 +132,20 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>Overall ATT<span class="sc">:</span>  </span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>    ATT    Std. Error     [ <span class="dv">95</span>%  Conf. Int.]  </span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a> <span class="fl">1.4559</span>        <span class="fl">0.0304</span>     <span class="fl">1.3964</span>      <span class="fl">1.5154</span> <span class="sc">*</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>Dynamic Effects<span class="sc">:</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a> Event Time Estimate Std. Error [<span class="dv">95</span>% Pointwise  Conf. Band]  </span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>         <span class="sc">-</span><span class="dv">2</span>  <span class="sc">-</span><span class="fl">0.0323</span>     <span class="fl">0.0369</span>         <span class="sc">-</span><span class="fl">0.1047</span>      <span class="fl">0.0401</span>  </span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>         <span class="sc">-</span><span class="dv">1</span>   <span class="fl">0.0780</span>     <span class="fl">0.0315</span>          <span class="fl">0.0163</span>      <span class="fl">0.1397</span> <span class="sc">*</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>          <span class="dv">0</span>   <span class="fl">1.0931</span>     <span class="fl">0.0239</span>          <span class="fl">1.0462</span>      <span class="fl">1.1400</span> <span class="sc">*</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>          <span class="dv">1</span>   <span class="fl">1.7832</span>     <span class="fl">0.0368</span>          <span class="fl">1.7111</span>      <span class="fl">1.8553</span> <span class="sc">*</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>          <span class="dv">2</span>   <span class="fl">2.4412</span>     <span class="fl">0.0539</span>          <span class="fl">2.3356</span>      <span class="fl">2.5468</span> <span class="sc">*</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="sc">---</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>Signif. codes<span class="sc">:</span> <span class="st">`</span><span class="at">*' confidence band does not cover 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>Overall ATT<span class="sc">:</span>  </span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    ATT    Std. Error     [ <span class="dv">95</span>%  Conf. Int.]  </span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a> <span class="fl">1.4559</span>        <span class="fl">0.0306</span>     <span class="fl">1.3959</span>      <span class="fl">1.5159</span> <span class="sc">*</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>Dynamic Effects<span class="sc">:</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a> Event Time Estimate Std. Error [<span class="dv">95</span>% Pointwise  Conf. Band]  </span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>         <span class="sc">-</span><span class="dv">2</span>  <span class="sc">-</span><span class="fl">0.0323</span>     <span class="fl">0.0369</span>         <span class="sc">-</span><span class="fl">0.1047</span>      <span class="fl">0.0401</span>  </span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>         <span class="sc">-</span><span class="dv">1</span>   <span class="fl">0.0780</span>     <span class="fl">0.0315</span>          <span class="fl">0.0162</span>      <span class="fl">0.1397</span> <span class="sc">*</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>          <span class="dv">0</span>   <span class="fl">1.0931</span>     <span class="fl">0.0239</span>          <span class="fl">1.0462</span>      <span class="fl">1.1400</span> <span class="sc">*</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>          <span class="dv">1</span>   <span class="fl">1.7832</span>     <span class="fl">0.0369</span>          <span class="fl">1.7110</span>      <span class="fl">1.8554</span> <span class="sc">*</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>          <span class="dv">2</span>   <span class="fl">2.4412</span>     <span class="fl">0.0539</span>          <span class="fl">2.3356</span>      <span class="fl">2.5468</span> <span class="sc">*</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">---</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>Signif. codes<span class="sc">:</span> <span class="st">`</span><span class="at">*' confidence band does not cover 0</span></span></code></pre></div>
 <p>The same interface can be used with <code>est_method = "imputation"</code> or with <code>nuisance_method = "ml"</code> for cross-fitted machine-learning nuisance estimates.</p>
 </div>
 <div class="section level2">
@@ -152,24 +155,24 @@
 <blockquote>
 <p>Caetano, C., Callaway, B., Payne, S., and Sant’Anna, H. (2026). “Difference-in-Differences with Bad Controls.” arXiv preprint arXiv:2608.03881. <a href="https://arxiv.org/abs/2608.03881" class="external-link uri">https://arxiv.org/abs/2608.03881</a></p>
 </blockquote>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">@</span>article{caetano2026badcontrols,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  title   <span class="ot">=</span> {Difference<span class="sc">-</span><span class="cf">in</span><span class="sc">-</span>Differences with Bad Controls},</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  author  <span class="ot">=</span> {Caetano, Carolina and Callaway, Brantly and Payne, Stroud and Sant<span class="st">'Anna, Hugo},</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="st">  journal = {arXiv preprint arXiv:2608.03881},</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="st">  year    = {2026},</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="st">  url     = {https://arxiv.org/abs/2608.03881}</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="sc">@</span>article{caetano2026badcontrols,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  title   <span class="ot">=</span> {Difference<span class="sc">-</span><span class="cf">in</span><span class="sc">-</span>Differences with Bad Controls},</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  author  <span class="ot">=</span> {Caetano, Carolina and Callaway, Brantly and Payne, Stroud and Sant<span class="st">'Anna, Hugo},</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="st">  journal = {arXiv preprint arXiv:2608.03881},</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="st">  year    = {2026},</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="st">  url     = {https://arxiv.org/abs/2608.03881}</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
 <p>To cite the <code>badcontrols</code> package itself:</p>
 <blockquote>
-<p>Caetano, C., Callaway, B., Payne, S., and Sant’Anna, H. (2026). badcontrols: Difference-in-Differences with Bad Controls. R package version 1.0.0. <a href="https://github.com/hugosantanna/badcontrols" class="external-link uri">https://github.com/hugosantanna/badcontrols</a></p>
+<p>Caetano, C., Callaway, B., Payne, S., and Sant’Anna, H. (2026). badcontrols: Difference-in-Differences with Bad Controls. R package version 1.1.0. <a href="https://github.com/hugosantanna/badcontrols" class="external-link uri">https://github.com/hugosantanna/badcontrols</a></p>
 </blockquote>
-<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="sc">@</span>Manual{caetano2026badcontrolspkg,</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  title  <span class="ot">=</span> {{badcontrols}<span class="sc">:</span> Difference<span class="sc">-</span><span class="cf">in</span><span class="sc">-</span>Differences with Bad Controls},</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  author <span class="ot">=</span> {Carolina Caetano and Brantly Callaway and Stroud Payne and Hugo Sant<span class="st">'Anna},</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="st">  year   = {2026},</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="st">  note   = {R package version 1.0.0},</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="st">  url    = {https://github.com/hugosantanna/badcontrols}</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="sc">@</span>Manual{caetano2026badcontrolspkg,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  title  <span class="ot">=</span> {{badcontrols}<span class="sc">:</span> Difference<span class="sc">-</span><span class="cf">in</span><span class="sc">-</span>Differences with Bad Controls},</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  author <span class="ot">=</span> {Carolina Caetano and Brantly Callaway and Stroud Payne and Hugo Sant<span class="st">'Anna},</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="st">  year   = {2026},</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="st">  note   = {R package version 1.1.0},</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="st">  url    = {https://github.com/hugosantanna/badcontrols}</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -179,7 +182,7 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-caetano-callaway-payne-santanna-2026" class="csl-entry">
 Caetano, Carolina, Brantly Callaway, Stroud Payne, and Hugo Sant’Anna. 2026. “Difference-in-Differences with Bad Controls.” <em>arXiv Preprint arXiv:2608.03881</em>. <a href="https://arxiv.org/abs/2608.03881" class="external-link uri">https://arxiv.org/abs/2608.03881</a>.
 </div>
@@ -192,6 +195,7 @@ Callaway, Brantly, and Pedro HC Sant’Anna. 2021. “Difference-in-Differences 
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=badcontrols" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/hugosantanna/badcontrols/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/hugosantanna/badcontrols/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -226,7 +230,7 @@ Callaway, Brantly, and Pedro HC Sant’Anna. 2021. “Difference-in-Differences 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/hugosantanna/badcontrols" class="external-link"><img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version"></a></li>
+<li><a href="https://github.com/hugosantanna/badcontrols" class="external-link"><img src="https://img.shields.io/badge/version-1.1.0-blue.svg" alt="Version"></a></li>
 <li><a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%3E%3D%204.1-blue.svg" alt="R"></a></li>
 <li><a href="https://www.gnu.org/licenses/gpl-3.0" class="external-link"><img src="https://img.shields.io/badge/License-GPL%20v3-green.svg" alt="License: GPL v3"></a></li>
 </ul>

@@ -59,34 +59,33 @@ occ_score_check <- pte_default(
   tname = "year",
   idname = "id",
   data = nlsy_job_displacement,
-  xformula = ~ race + female + educ_max_grade,
+  xformula = ~ race + female + educ_max_grade + log_earnings,
   d_outcome = FALSE,
   lagged_outcome_cov = TRUE,
   est_method = "reg",
   control_group = "notyettreated",
-  base_period = "universal",
+  base_period = "varying",
   bstrap = FALSE
 )
 
 summary(occ_score_check)
 #> 
 #> Overall ATT:  
-#>     ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.033        0.0093    -0.0512     -0.0148 *
+#>      ATT    Std. Error     [ 95%  Conf. Int.]  
+#>  -0.0261        0.0092    -0.0442      -0.008 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  
-#>         -10  -0.0210     0.0218         -0.0638      0.0218  
-#>          -8  -0.0218     0.0169         -0.0549      0.0114  
-#>          -6   0.0015     0.0146         -0.0272      0.0301  
-#>          -4  -0.0266     0.0127         -0.0514     -0.0018 *
-#>          -2   0.0000         NA              NA          NA  
-#>           0  -0.0398     0.0109         -0.0612     -0.0185 *
-#>           2  -0.0290     0.0119         -0.0523     -0.0057 *
-#>           4  -0.0070     0.0147         -0.0358      0.0218  
-#>           6  -0.0198     0.0167         -0.0525      0.0129  
-#>           8  -0.0138     0.0201         -0.0533      0.0257  
+#>          -8  -0.0026     0.0187         -0.0391      0.0340  
+#>          -6   0.0056     0.0162         -0.0261      0.0373  
+#>          -4  -0.0202     0.0133         -0.0463      0.0059  
+#>          -2   0.0048     0.0123         -0.0193      0.0289  
+#>           0  -0.0328     0.0109         -0.0541     -0.0115 *
+#>           2  -0.0206     0.0119         -0.0439      0.0027  
+#>           4   0.0010     0.0144         -0.0273      0.0293  
+#>           6  -0.0095     0.0167         -0.0422      0.0232  
+#>           8  -0.0005     0.0206         -0.0408      0.0398  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ```
@@ -121,7 +120,7 @@ res_imputation <- didbc(
   xformula = ~ race + female + educ_max_grade,
   est_method = "imputation",
   control_group = "notyettreated",
-  base_period = "universal",
+  base_period = "varying",
   bstrap = FALSE
 )
 
@@ -129,20 +128,19 @@ summary(res_imputation)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0672        0.0242    -0.1146     -0.0199 *
+#>  -0.0672        0.0243    -0.1148     -0.0197 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  
-#>         -10  -0.0335     0.0561         -0.1434      0.0764  
-#>          -8   0.0028     0.0360         -0.0679      0.0734  
-#>          -6   0.0028     0.0256         -0.0474      0.0530  
-#>          -4  -0.0161     0.0247         -0.0645      0.0323  
-#>          -2   0.0000         NA              NA          NA  
-#>           0  -0.0995     0.0262         -0.1509     -0.0482 *
-#>           2  -0.1251     0.0373         -0.1982     -0.0521 *
-#>           4  -0.0518     0.0374         -0.1251      0.0214  
-#>           6   0.0364     0.0470         -0.0556      0.1285  
+#>          -8  -0.0160     0.0506         -0.1152      0.0832  
+#>          -6  -0.0094     0.0319         -0.0720      0.0531  
+#>          -4  -0.0136     0.0251         -0.0628      0.0356  
+#>          -2   0.0082     0.0246         -0.0399      0.0564  
+#>           0  -0.0995     0.0263         -0.1510     -0.0481 *
+#>           2  -0.1251     0.0374         -0.1985     -0.0518 *
+#>           4  -0.0518     0.0375         -0.1253      0.0217  
+#>           6   0.0364     0.0470         -0.0557      0.1285  
 #>           8   0.0472     0.0762         -0.1022      0.1966  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
@@ -179,7 +177,7 @@ didbc(
   est_method = "dr_ml",
   nuisance_method = "parametric",
   control_group = "notyettreated",
-  base_period = "universal",
+  base_period = "varying",
   bstrap = FALSE
 )
 
@@ -196,7 +194,7 @@ didbc(
   est_method = "dr_ml",
   nuisance_method = "ml",
   control_group = "notyettreated",
-  base_period = "universal",
+  base_period = "varying",
   bstrap = FALSE
 )
 ```
@@ -222,7 +220,7 @@ didbc(
   est_method = "imputation",
   bad_control_identification_strategy = "did",
   control_group = "notyettreated",
-  base_period = "universal",
+  base_period = "varying",
   bstrap = FALSE
 )
 ```

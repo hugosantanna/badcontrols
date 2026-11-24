@@ -97,14 +97,14 @@ and we make the following parallel trends assumption:
 \E\[\Delta Y\_{t^\*}(0) \mid X\_{t^\*}(0), X\_{t^\*-1}, Z, D=0\], \\
 
 This assumption is exactly the same as the conditional parallel trends
-assumptions in the difference-in-differences literature ([Heckman et al.
-1997](#ref-heckman-ichimura-todd-1997); [Callaway and Sant’Anna
-2021](#ref-callaway-santanna-2021)). It says that, in the absence of the
-treatment, the trend in untreated potential outcomes would have been the
-same for treated and untreated units with the same covariates. Notice
-that, unlike Options 1 and 2 above, this assumption uses \\X\_{it}\\ as
-a genuine control while also allowing for it to be affected by the
-treatment.
+assumptions in the difference-in-differences literature ([Heckman,
+Ichimura, and Todd 1997](#ref-heckman-ichimura-todd-1997); [Callaway and
+Sant’Anna 2021](#ref-callaway-santanna-2021)). It says that, in the
+absence of the treatment, the trend in untreated potential outcomes
+would have been the same for treated and untreated units with the same
+covariates. Notice that, unlike Options 1 and 2 above, this assumption
+uses \\X\_{it}\\ as a genuine control while also allowing for it to be
+affected by the treatment.
 
 The challenge is that the untreated potential version of the bad
 control, \\X\_{t^\*}(0)\\, is not observed for treated units. This makes
@@ -229,7 +229,7 @@ arXiv:2608.03881*. <https://arxiv.org/abs/2608.03881>.
 
 Callaway, Brantly, and Tong Li. 2019. “Quantile Treatment Effects in
 Difference in Differences Models with Panel Data.” *Quantitative
-Economics* 10 (4): 1579–618.
+Economics* 10 (4): 1579–1618.
 
 Callaway, Brantly, and Pedro HC Sant’Anna. 2021.
 “Difference-in-Differences with Multiple Time Periods.” *Journal of

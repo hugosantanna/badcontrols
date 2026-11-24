@@ -35,7 +35,7 @@ bad_control_identification_strategy = &quot;did&quot;."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">badcontrols</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,63 +83,15 @@ comparison group; Step 2 (the outcome regression) is unchanged from
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imputation_did</span><span class="op">(</span></span>
-<span>  <span class="va">wide_data</span>,</span>
-<span>  <span class="va">pre_data</span>,</span>
-<span>  <span class="va">post_data</span>,</span>
-<span>  <span class="va">D</span>,</span>
-<span>  <span class="va">n</span>,</span>
-<span>  <span class="va">x_names</span>,</span>
-<span>  <span class="va">dx_names</span>,</span>
-<span>  <span class="va">bc_cov_names</span>,</span>
-<span>  <span class="va">bc_dcov_names</span>,</span>
-<span>  <span class="va">comparison_idx</span>,</span>
-<span>  <span class="va">bad_control_formula</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">imputation_did</span><span class="op">(</span><span class="va">cd</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-wide-data">wide_data<a class="anchor" aria-label="anchor" href="#arg-wide-data"></a></dt>
-<dd><p>one row per unit, as constructed by
-<code><a href="imputation_attgt.html">imputation_attgt</a></code></p></dd>
-
-
-<dt id="arg-pre-data-post-data">pre_data, post_data<a class="anchor" aria-label="anchor" href="#arg-pre-data-post-data"></a></dt>
-<dd><p>the pre/post-period long-format subsets of the
-original <code>gt_data</code>, as constructed by
-<code><a href="imputation_attgt.html">imputation_attgt</a></code></p></dd>
-
-
-<dt id="arg-d">D<a class="anchor" aria-label="anchor" href="#arg-d"></a></dt>
-<dd><p>treatment indicator vector, aligned to <code>wide_data</code></p></dd>
-
-
-<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>number of units (<code>nrow(wide_data)</code>)</p></dd>
-
-
-<dt id="arg-x-names-dx-names">x_names, dx_names<a class="anchor" aria-label="anchor" href="#arg-x-names-dx-names"></a></dt>
-<dd><p>names of the general exogenous covariate columns
-(level and change, respectively) already merged into <code>wide_data</code></p></dd>
-
-
-<dt id="arg-bc-cov-names-bc-dcov-names">bc_cov_names, bc_dcov_names<a class="anchor" aria-label="anchor" href="#arg-bc-cov-names-bc-dcov-names"></a></dt>
-<dd><p>names of the bad-control auxiliary
-covariate columns (level and change, respectively, W in the paper)
-already merged into <code>wide_data</code></p></dd>
-
-
-<dt id="arg-comparison-idx">comparison_idx<a class="anchor" aria-label="anchor" href="#arg-comparison-idx"></a></dt>
-<dd><p>row indices of <code>wide_data</code> in the comparison
-(untreated) group</p></dd>
-
-
-<dt id="arg-bad-control-formula">bad_control_formula<a class="anchor" aria-label="anchor" href="#arg-bad-control-formula"></a></dt>
-<dd><p>One-sided formula naming the bad control
-variable, or <code>NULL</code> for no bad control at all</p></dd>
+<dl><dt id="arg-cd">cd<a class="anchor" aria-label="anchor" href="#arg-cd"></a></dt>
+<dd><p>one (g,t) cell's data, from <code>bc_cell_data()</code></p></dd>
 
 </dl></div>
 
