@@ -3,9 +3,7 @@
 This is a minor release (1.0.1 -> 1.1.0). It requires `ptetools`
 (>= 1.1.0), now on CRAN. Main changes (see NEWS.md):
 
-* Sampling weights (`weightsname`) now work: previously they only entered
-  the aggregation across groups, so group-time estimates and their
-  standard errors were unweighted.
+* Support for sampling weights (`weightsname`)
 * New `clustervars` argument for clustered standard errors.
 * Covariate formulas can transform variables (e.g. `~ factor(state)`),
   which previously failed or was silently ignored.
@@ -29,11 +27,6 @@ Results without weights are unchanged.
 `rcmdcheck::rcmdcheck(args = "--as-cran")`:
 
 0 errors | 0 warnings | 0 notes
-
-(Locally, there are two NOTEs that come from the check machine, not the
-package: HTML validation and math rendering in the manual were skipped
-because HTML Tidy and V8 are not installed, and the current time could not
-be verified.)
 
 The incoming-feasibility check has previously flagged "Caetano, Callaway,
 Sant'Anna" as possibly misspelled words in DESCRIPTION; these are the
